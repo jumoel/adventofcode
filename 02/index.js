@@ -2,7 +2,6 @@ const program = "1,12,2,3,1,1,2,3,1,3,4,3,1,5,0,3,2,13,1,19,1,5,19,23,2,10,23,27
   .split(",")
   .map(n => Number.parseInt(n, 10));
 
-const INSTRUCTION_LENGTH = 4;
 const OP_ADD = 1;
 const OP_MUL = 2;
 const OP_EXIT = 99;
