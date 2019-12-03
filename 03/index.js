@@ -51,10 +51,12 @@ function getTraveledPoints(line) {
 
           for (let y = 0; y <= Math.abs(tdy); y++) {
             for (let x = 0; x <= Math.abs(tdx); x++) {
-              acc.push([
-                prevX + Math.sign(tdx) * x,
-                prevY + Math.sign(tdy) * y
-              ]);
+              if (x !== 0 || y !== 0) {
+                acc.push([
+                  prevX + Math.sign(tdx) * x,
+                  prevY + Math.sign(tdy) * y
+                ]);
+              }
             }
           }
 
@@ -81,8 +83,8 @@ function getInput(input) {
 function closestDistance(input) {
   const [first, second] = getInput(input);
 
-  const traveledFirst = new Set(getTraveledPoints(first));
-  const traveledSecond = new Set(getTraveledPoints(second));
+  const traveledFirst = getTraveledPoints(first);
+  const traveledSecond = getTraveledPoints(second);
 
   const crosses = setIntersection(
     new Set(traveledFirst),
@@ -98,6 +100,30 @@ function closestDistance(input) {
   return distances.shift();
 }
 
+function stepClosestDistance(input) {
+  const [first, second] = getInput(input);
+
+  const traveledFirst = getTraveledPoints(first);
+  const traveledSecond = getTraveledPoints(second);
+
+  const crosses = setIntersection(
+    new Set(traveledFirst),
+    new Set(traveledSecond)
+  );
+
+  const stepDistances = [...crosses]
+    .map(crossPos => {
+      return (
+        traveledFirst.findIndex(e => e === crossPos) +
+        traveledSecond.findIndex(e => e === crossPos)
+      );
+    })
+    .filter(Boolean)
+    .sort((a, b) => a - b);
+
+  return stepDistances.shift();
+}
+
 module.exports = {
   closestDistance,
   getTraveledPoints,
@@ -106,5 +132,6 @@ module.exports = {
 
 if (require.main === module) {
   const fileContent = fs.readFileSync(process.argv[2]).toString();
-  console.log(closestDistance(fileContent));
+  console.log("Manhattan distance:", closestDistance(fileContent));
+  console.log("Step distance:", stepClosestDistance(fileContent));
 }
