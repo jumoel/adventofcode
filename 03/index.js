@@ -131,7 +131,9 @@ module.exports = {
 };
 
 if (require.main === module) {
-  const fileContent = fs.readFileSync(process.argv[2]).toString();
+  const { readInput } = require("../util/readInput");
+  const fileContent = readInput(__dirname);
+
   console.log("Manhattan distance:", closestDistance(fileContent));
   console.log("Step distance:", stepClosestDistance(fileContent));
 }

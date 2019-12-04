@@ -1,15 +1,14 @@
 const { range } = require("../util/range");
+const { intSplit } = require("../util/int");
 
 function hasDouble(input) {
-  return String(input)
-    .split("")
-    .some((value, index, arr) => {
-      if (index === 0) {
-        return false;
-      }
+  return intSplit(input).some((value, index, arr) => {
+    if (index === 0) {
+      return false;
+    }
 
-      return value === arr[index - 1];
-    });
+    return value === arr[index - 1];
+  });
 }
 
 function hasNotMoreThanTwo(input) {
@@ -19,13 +18,24 @@ function hasNotMoreThanTwo(input) {
     .some(s => s.length === 2);
 }
 
+// This was made after the fact to understand the logic behind the list indexing.
+function hasStrictPair(input) {
+  return intSplit(input).some((val, index, arr) => {
+    const valid = index !== arr.length - 1 && val === arr[index + 1];
+    const validPrev = index === 0 || val !== arr[index - 1];
+    const validEnd = index === arr.length - 2 || val !== arr[arr.length - 2];
+
+    return valid && validPrev && validEnd;
+  });
+}
+
 function hasLength(input) {
   return String(input).length === 6;
 }
 
 function notDecreasing(input) {
   let largest = -1;
-  return [...String(input)].map(Number).every((value, index, arr) => {
+  return intSplit(input).every((value, index, arr) => {
     if (value < largest) {
       return false;
     }
@@ -47,14 +57,14 @@ module.exports = {
   validPassword,
   notDecreasing,
   validPassword2,
-  hasNotMoreThanTwo
+  hasNotMoreThanTwo,
+  hasStrictPair
 };
 
 if (require.main === module) {
-  const fs = require("fs");
-  const fileContent = fs.readFileSync(process.argv[2]).toString();
-  const [begin, end] = fileContent
-    .trim()
+  const { readInput } = require("../util/readInput");
+
+  const [begin, end] = readInput(__dirname)
     .split("-")
     .map(Number);
 

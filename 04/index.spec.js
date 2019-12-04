@@ -2,7 +2,8 @@ const {
   validPassword,
   notDecreasing,
   validPassword2,
-  hasNotMoreThanTwo
+  hasNotMoreThanTwo,
+  hasStrictPair
 } = require("./index.js");
 
 test.each([
@@ -28,4 +29,5 @@ test.each([
   [112233, true]
 ])("HNMTT: for %p it should be %p", (input, expected) => {
   expect(hasNotMoreThanTwo(input)).toBe(expected);
+  expect(hasStrictPair(input)).toBe(expected);
 });
