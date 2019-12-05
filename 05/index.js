@@ -1,4 +1,5 @@
 const { intSplit, intCombine } = require("../util/int");
+const { arrayPad } = require("../util/array");
 const { DEBUG, ASSERT } = require("../util/test");
 
 const OP_ADD = 1;
@@ -39,16 +40,6 @@ function argLength(opcode) {
       console.error(`Unknown instruction: ${opcode}'`);
       process.exit(1);
   }
-}
-
-function arrayPad(arr, totalLength, value) {
-  if (totalLength < arr.length) {
-    return arr;
-  }
-
-  const newArr = new Array(totalLength - arr.length).fill(value);
-
-  return arr.concat(newArr);
 }
 
 function runProgram(program, inputs = []) {
