@@ -58,7 +58,7 @@ module.exports = {
   notDecreasing,
   validPassword2,
   hasNotMoreThanTwo,
-  hasStrictPair
+  hasStrictPair,
 };
 
 if (require.main === module) {

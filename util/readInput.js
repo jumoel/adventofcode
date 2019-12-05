@@ -9,5 +9,5 @@ function readInput(dir) {
 }
 
 module.exports = {
-  readInput
+  readInput,
 };

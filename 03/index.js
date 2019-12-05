@@ -54,7 +54,7 @@ function getTraveledPoints(line) {
               if (x !== 0 || y !== 0) {
                 acc.push([
                   prevX + Math.sign(tdx) * x,
-                  prevY + Math.sign(tdy) * y
+                  prevY + Math.sign(tdy) * y,
                 ]);
               }
             }
@@ -62,7 +62,7 @@ function getTraveledPoints(line) {
 
           return acc;
         },
-        [[0, 0]]
+        [[0, 0]],
       )
       // To get Set.prototype.has to work
       .map(([x, y]) => `${x},${y}`)
@@ -88,7 +88,7 @@ function closestDistance(input) {
 
   const crosses = setIntersection(
     new Set(traveledFirst),
-    new Set(traveledSecond)
+    new Set(traveledSecond),
   );
 
   const distances = [...crosses]
@@ -108,7 +108,7 @@ function stepClosestDistance(input) {
 
   const crosses = setIntersection(
     new Set(traveledFirst),
-    new Set(traveledSecond)
+    new Set(traveledSecond),
   );
 
   const stepDistances = [...crosses]
@@ -127,7 +127,7 @@ function stepClosestDistance(input) {
 module.exports = {
   closestDistance,
   getTraveledPoints,
-  stepClosestDistance
+  stepClosestDistance,
 };
 
 if (require.main === module) {

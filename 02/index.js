@@ -81,5 +81,5 @@ if (require.main === module) {
 }
 
 module.exports = {
-  runProgram
+  runProgram,
 };
