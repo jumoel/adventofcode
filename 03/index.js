@@ -1,4 +1,5 @@
 const fs = require("fs");
+const { SetIntersection } = require("../util/set");
 
 function parseTravel(input) {
   const [direction, ...numbers] = input.split("");
@@ -69,10 +70,6 @@ function getTraveledPoints(line) {
   );
 }
 
-function setIntersection(a, b) {
-  return new Set([...a].filter(x => b.has(x)));
-}
-
 function getInput(input) {
   return input
     .trim()
@@ -86,7 +83,7 @@ function closestDistance(input) {
   const traveledFirst = getTraveledPoints(first);
   const traveledSecond = getTraveledPoints(second);
 
-  const crosses = setIntersection(
+  const crosses = SetIntersection(
     new Set(traveledFirst),
     new Set(traveledSecond),
   );
@@ -106,7 +103,7 @@ function stepClosestDistance(input) {
   const traveledFirst = getTraveledPoints(first);
   const traveledSecond = getTraveledPoints(second);
 
-  const crosses = setIntersection(
+  const crosses = SetIntersection(
     new Set(traveledFirst),
     new Set(traveledSecond),
   );
