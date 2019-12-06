@@ -5,7 +5,8 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "dev": "bsb -w -clean-world -make-world"
+    "dev": "bsb -w -clean-world -make-world",
+    "tscw": "tsc --watch $DAY/**.ts"
   },
   "devDependencies": {
     "@types/node": "^12.12.14",
