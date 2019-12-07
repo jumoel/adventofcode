@@ -19,7 +19,7 @@ interface OpInput {
   opcode: OpCode;
   numargs: number;
   numouts: number;
-  fn(modes: Modes, params: Params, mem: Mem, vmState?: VmState);
+  fn(modes: Modes, params: Params, vmState: VmState);
 }
 
 type VmState = {
@@ -28,6 +28,7 @@ type VmState = {
   inputs: Inputs;
   outputs: Outputs;
   pc: number;
+  mem: Mem;
 };
 
 interface Op extends OpInput {
@@ -78,19 +79,24 @@ export function OPMAP(oplist: OpInput[]): OpMap {
   }, new Map<OpCode, Op>());
 }
 
-export function newVM(): VmState {
+export function newVM(mem = []): VmState {
   return {
     inputs: [],
     shouldExit: false,
     shouldSuspend: false,
     outputs: [],
     pc: 0,
+    mem: [...mem], // ensure it's a deep copy of the integers
   };
 }
 
-export function runProgram(mem: Mem, ops: OpMap, vmState: VmState = newVM()) {
+export function runProgram(ops: OpMap, vmState: VmState = newVM()) {
   while (!vmState.shouldExit) {
-    const { opcode, modes, params } = getInstruction(mem, vmState.pc, ops);
+    const { opcode, modes, params } = getInstruction(
+      vmState.mem,
+      vmState.pc,
+      ops,
+    );
 
     DEBUG(`OP[${vmState.pc}]: ${opcode} ${modes} ${params} `);
     ASSERT(
@@ -98,7 +104,7 @@ export function runProgram(mem: Mem, ops: OpMap, vmState: VmState = newVM()) {
       `Invalid opcode found: '${opcode} at pc:${vmState.pc}'`,
     );
 
-    const jump = ops.get(opcode as OpCode).fn(modes, params, mem, vmState);
+    const jump = ops.get(opcode as OpCode).fn(modes, params, vmState);
 
     if (vmState.shouldSuspend) {
       break;

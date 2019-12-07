@@ -1,8 +1,7 @@
-import { intSplit, intCombine } from "../util/int";
 import { DEBUG, ASSERT } from "../util/test";
+import { permutations } from "../util/array";
 
-import { get, set, getInstruction, OPMAP, runProgram, newVM } from "./vm";
-import { bigIntLiteral } from "@babel/types";
+import { get, set, OPMAP, runProgram, newVM } from "./vm";
 
 const ops = OPMAP([
   {
@@ -10,13 +9,13 @@ const ops = OPMAP([
     opcode: 1,
     numargs: 2,
     numouts: 1,
-    fn(modes, params, mem, vmState) {
-      const in1 = get(mem, modes[0], params[0]);
-      const in2 = get(mem, modes[1], params[1]);
+    fn(modes, params, vmState) {
+      const in1 = get(vmState.mem, modes[0], params[0]);
+      const in2 = get(vmState.mem, modes[1], params[1]);
 
       DEBUG(`ADD: ${in1} ${in2} ${params[2]}`);
 
-      set(mem, params[2], in1 + in2);
+      set(vmState.mem, params[2], in1 + in2);
     },
   },
 
@@ -25,13 +24,13 @@ const ops = OPMAP([
     opcode: 2,
     numargs: 2,
     numouts: 1,
-    fn(modes, params, mem, vmState) {
-      const in1 = get(mem, modes[0], params[0]);
-      const in2 = get(mem, modes[1], params[1]);
+    fn(modes, params, vmState) {
+      const in1 = get(vmState.mem, modes[0], params[0]);
+      const in2 = get(vmState.mem, modes[1], params[1]);
 
       DEBUG(`MULT: ${in1} ${in2} ${params[2]}`);
 
-      set(mem, params[2], in1 * in2);
+      set(vmState.mem, params[2], in1 * in2);
     },
   },
 
@@ -40,7 +39,7 @@ const ops = OPMAP([
     opcode: 3,
     numargs: 0,
     numouts: 1,
-    fn(modes, params, mem, vmState) {
+    fn(modes, params, vmState) {
       if (vmState.inputs.length === 0) {
         vmState.shouldSuspend = true;
         return;
@@ -49,7 +48,7 @@ const ops = OPMAP([
       ASSERT(Number.isInteger(input), "Received non-int input");
       DEBUG(`INPUT: ${input} ${params[0]}`);
 
-      set(mem, params[0], input);
+      set(vmState.mem, params[0], input);
     },
   },
 
@@ -58,8 +57,8 @@ const ops = OPMAP([
     opcode: 4,
     numargs: 1,
     numouts: 0,
-    fn(modes, params, mem, vmState) {
-      const output = get(mem, modes[0], params[0]);
+    fn(modes, params, vmState) {
+      const output = get(vmState.mem, modes[0], params[0]);
       vmState.outputs.push(output);
       DEBUG("OUTPUT:", output);
     },
@@ -70,9 +69,9 @@ const ops = OPMAP([
     opcode: 5,
     numargs: 2,
     numouts: 0,
-    fn(modes, params, mem, vmState) {
-      const in1 = get(mem, modes[0], params[0]);
-      const in2 = get(mem, modes[1], params[1]);
+    fn(modes, params, vmState) {
+      const in1 = get(vmState.mem, modes[0], params[0]);
+      const in2 = get(vmState.mem, modes[1], params[1]);
 
       DEBUG(`JNZ: ${in1} ${in2}`);
 
@@ -88,9 +87,9 @@ const ops = OPMAP([
     opcode: 6,
     numargs: 2,
     numouts: 0,
-    fn(modes, params, mem, vmState) {
-      const in1 = get(mem, modes[0], params[0]);
-      const in2 = get(mem, modes[1], params[1]);
+    fn(modes, params, vmState) {
+      const in1 = get(vmState.mem, modes[0], params[0]);
+      const in2 = get(vmState.mem, modes[1], params[1]);
 
       DEBUG(`JZ: ${in1} ${in2}`);
 
@@ -106,15 +105,15 @@ const ops = OPMAP([
     opcode: 7,
     numargs: 2,
     numouts: 1,
-    fn(modes, params, mem, vmState) {
-      const in1 = get(mem, modes[0], params[0]);
-      const in2 = get(mem, modes[1], params[1]);
+    fn(modes, params, vmState) {
+      const in1 = get(vmState.mem, modes[0], params[0]);
+      const in2 = get(vmState.mem, modes[1], params[1]);
 
       const value = in1 < in2 ? 1 : 0;
 
       DEBUG(`LT: ${in1} ${in2} ${value} ${params[2]}`);
 
-      set(mem, params[2], value);
+      set(vmState.mem, params[2], value);
     },
   },
 
@@ -123,15 +122,15 @@ const ops = OPMAP([
     opcode: 8,
     numargs: 2,
     numouts: 1,
-    fn(modes, params, mem, vmState) {
-      const in1 = get(mem, modes[0], params[0]);
-      const in2 = get(mem, modes[1], params[1]);
+    fn(modes, params, vmState) {
+      const in1 = get(vmState.mem, modes[0], params[0]);
+      const in2 = get(vmState.mem, modes[1], params[1]);
 
       const value = in1 === in2 ? 1 : 0;
 
       DEBUG(`EQ: ${in1} ${in2} ${value}`);
 
-      set(mem, params[2], value);
+      set(vmState.mem, params[2], value);
     },
   },
 
@@ -140,43 +139,24 @@ const ops = OPMAP([
     opcode: 99,
     numargs: 0,
     numouts: 0,
-    fn(modes, params, mem, vmState) {
+    fn(modes, params, vmState) {
       DEBUG("HALT");
       vmState.shouldExit = true;
     },
   },
 ]);
 
-function perm(xs) {
-  let ret = [];
-
-  for (let i = 0; i < xs.length; i = i + 1) {
-    let rest = perm(xs.slice(0, i).concat(xs.slice(i + 1)));
-
-    if (!rest.length) {
-      ret.push([xs[i]]);
-    } else {
-      for (let j = 0; j < rest.length; j = j + 1) {
-        ret.push([xs[i]].concat(rest[j]));
-      }
-    }
-  }
-  return ret;
-}
-
 function part1(program) {
-  const versions = perm([0, 1, 2, 3, 4]);
+  const versions = permutations([0, 1, 2, 3, 4]);
 
   const output = versions.map(phaseSettings => {
-    let programs = [
-      [...program],
-      [...program],
-      [...program],
-      [...program],
-      [...program],
+    const states = [
+      newVM(program),
+      newVM(program),
+      newVM(program),
+      newVM(program),
+      newVM(program),
     ];
-
-    const states = [newVM(), newVM(), newVM(), newVM(), newVM()];
 
     let input = 0;
 
@@ -184,7 +164,7 @@ function part1(program) {
       states[i].inputs.push(phaseSettings[i]);
       states[i].inputs.push(input);
 
-      const vm = runProgram(programs[i], ops, states[i]);
+      const vm = runProgram(ops, states[i]);
 
       input = vm.outputs[vm.outputs.length - 1];
     }
@@ -196,18 +176,16 @@ function part1(program) {
 }
 
 function part2(program) {
-  const versions = perm([5, 6, 7, 8, 9]);
+  const versions = permutations([5, 6, 7, 8, 9]);
 
   const output = versions.map(phaseSettings => {
-    let programs = [
-      [...program],
-      [...program],
-      [...program],
-      [...program],
-      [...program],
+    const states = [
+      newVM(program),
+      newVM(program),
+      newVM(program),
+      newVM(program),
+      newVM(program),
     ];
-
-    const states = [newVM(), newVM(), newVM(), newVM(), newVM()];
 
     // Initial input
     for (let i = 0; i < states.length; i++) {
@@ -216,15 +194,12 @@ function part2(program) {
     states[0].inputs.push(0);
 
     let i = 0;
-
     while (!states[i].shouldExit) {
       const state = states[i];
-      const program = programs[i];
 
-      const vm = runProgram(program, ops, state);
-      states[i] = vm;
-
+      const vm = runProgram(ops, state);
       const output = vm.outputs[vm.outputs.length - 1];
+      states[i] = vm;
 
       // Next VM
       i = (i + 1) % states.length;
