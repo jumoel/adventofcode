@@ -8,6 +8,14 @@ function arrayPad(arr, totalLength, value) {
   return arr.concat(newArr);
 }
 
+function last(arr) {
+  if (arr.length === 0) {
+    return undefined;
+  }
+
+  return arr[arr.length - 1];
+}
+
 function permutations(arr) {
   if (arr.length < 2) {
     return [...arr];

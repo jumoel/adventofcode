@@ -1,5 +1,5 @@
 import { DEBUG, ASSERT } from "../util/test";
-import { permutations } from "../util/array";
+import { permutations, last } from "../util/array";
 
 import { get, set, OPMAP, runProgram, newVM } from "./vm";
 
@@ -166,7 +166,7 @@ function part1(program) {
 
       const vm = runProgram(ops, states[i]);
 
-      input = vm.outputs[vm.outputs.length - 1];
+      input = last(vm.outputs);
     }
 
     return input;
@@ -198,7 +198,7 @@ function part2(program) {
       const state = states[i];
 
       const vm = runProgram(ops, state);
-      const output = vm.outputs[vm.outputs.length - 1];
+      const output = last(vm.outputs);
       states[i] = vm;
 
       // Next VM
