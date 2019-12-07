@@ -38,4 +38,5 @@ function permutations(arr) {
 module.exports = {
   arrayPad,
   permutations,
+  last,
 };
