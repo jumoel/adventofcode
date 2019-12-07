@@ -104,7 +104,8 @@ export function runProgram(ops: OpMap, vmState: VmState = newVM()) {
       `Invalid opcode found: '${opcode} at pc:${vmState.pc}'`,
     );
 
-    const jump = ops.get(opcode as OpCode).fn(modes, params, vmState);
+    const op = ops.get(opcode as OpCode);
+    const jump = op.fn(modes, params, vmState);
 
     if (vmState.shouldSuspend) {
       break;
@@ -113,7 +114,7 @@ export function runProgram(ops: OpMap, vmState: VmState = newVM()) {
     if (Number.isInteger(jump)) {
       vmState.pc = jump;
     } else {
-      vmState.pc += ops.get(opcode as OpCode).len;
+      vmState.pc += op.len;
     }
   }
 
