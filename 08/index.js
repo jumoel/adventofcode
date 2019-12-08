@@ -1,4 +1,4 @@
-const { chunk, matches } = require("../util/array");
+const { chunk, matches, transpose } = require("../util/array");
 
 const WIDTH = 25;
 const HEIGHT = 6;
@@ -21,31 +21,12 @@ function part1(input) {
 function part2(input) {
   const layers = chunk([...input], WIDTH * HEIGHT);
 
-  const image = [];
-
-  for (let y = 0; y < HEIGHT; y++) {
-    for (let x = 0; x < WIDTH; x++) {
-      image.push(getPixelData(layers, x, y));
-    }
-  }
+  const image = transpose(layers).map(s => s.find(p => p !== "2"));
 
   return chunk(image, WIDTH)
     .map(s => s.join(""))
     .join("\n")
     .replace(/0/g, " ");
-}
-
-function getPixelData(layers, x, y) {
-  const TRANSPARENT = "2";
-
-  for (let l = 0; l < layers.length; l++) {
-    const found = layers[l][WIDTH * y + x];
-    if (found !== TRANSPARENT) {
-      return found;
-    }
-  }
-
-  return TRANSPARENT;
 }
 
 if (require.main === module) {

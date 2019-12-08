@@ -1,3 +1,5 @@
+const { ASSERT } = require("./test");
+
 function arrayPad(arr, totalLength, value) {
   if (totalLength < arr.length) {
     return arr;
@@ -64,10 +66,19 @@ function matches(arr, value) {
   }, 0);
 }
 
+function transpose(arr) {
+  ASSERT(
+    Array.isArray(arr) && arr.length > 0 && Array.isArray(arr[0]),
+    "Transpose only works on arrays of arrays",
+  );
+  return arr[0].map((_, column) => arr.map(row => row[column]));
+}
+
 module.exports = {
   arrayPad,
   permutations,
   last,
   chunk,
   matches,
+  transpose,
 };
