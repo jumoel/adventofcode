@@ -1,5 +1,5 @@
 const { ASSERT } = require("../util/test");
-const { SetIntersection } = require("../util/set");
+const { intersection } = require("../util/set");
 
 function sanitize(input) {
   return input
@@ -56,7 +56,7 @@ function shortestOrbitPath(input) {
   const youToCom = findPath(orbitHash, "YOU");
   const sanToCom = findPath(orbitHash, "SAN");
 
-  const crosses = SetIntersection(new Set(youToCom), new Set(sanToCom));
+  const crosses = intersection(new Set(youToCom), new Set(sanToCom));
 
   function crossDist(cross) {
     return youToCom.indexOf(cross) + sanToCom.indexOf(cross);
