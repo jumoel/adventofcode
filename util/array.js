@@ -54,9 +54,20 @@ function chunk(arr, size) {
   );
 }
 
+function matches(arr, value) {
+  return arr.reduce((acc, a) => {
+    if (a === value) {
+      return acc + 1;
+    }
+
+    return acc;
+  }, 0);
+}
+
 module.exports = {
   arrayPad,
   permutations,
   last,
   chunk,
+  matches,
 };
