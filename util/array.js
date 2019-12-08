@@ -35,8 +35,28 @@ function permutations(arr) {
   return res;
 }
 
+function chunk(arr, size) {
+  if (arr.length === 0) {
+    return [];
+  }
+
+  return arr.reduce(
+    (acc, e) => {
+      if (acc[acc.length - 1].length < size) {
+        acc[acc.length - 1].push(e);
+      } else {
+        acc.push([e]);
+      }
+
+      return acc;
+    },
+    [[]],
+  );
+}
+
 module.exports = {
   arrayPad,
   permutations,
   last,
+  chunk,
 };
