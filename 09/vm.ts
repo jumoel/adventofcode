@@ -2,10 +2,10 @@ import { ASSERT, DEBUG } from "../util/test";
 import { intSplit, intCombine } from "../util/int";
 import { arrayPad } from "../util/array";
 
-type MemMode = 0 | 1;
-const POSITION_MODE = 0 as MemMode;
-const IMMEDIATE_MODE = 1 as MemMode;
-const RELATIVE_MODE = 2 as MemMode;
+type MemMode = 0 | 1 | 2;
+const POSITION_MODE: MemMode = 0;
+const IMMEDIATE_MODE: MemMode = 1;
+const RELATIVE_MODE: MemMode = 2;
 
 type Modes = MemMode[];
 type Params = number[];
@@ -20,7 +20,7 @@ interface OpInput {
   opcode: OpCode;
   numargs: number;
   numouts: number;
-  fn(modes: Modes, params: Params, vmState: VmState);
+  fn(modes: Modes, params: Params, vm: VmState);
 }
 
 type VmState = {
@@ -39,14 +39,171 @@ interface Op extends OpInput {
 
 type OpMap = Map<OpCode, Op>;
 
+const ops = OPMAP([
+  {
+    name: "ADD",
+    opcode: 1,
+    numargs: 2,
+    numouts: 1,
+    fn(modes, params, vm) {
+      const in1 = get(vm, modes[0], params[0]);
+      const in2 = get(vm, modes[1], params[1]);
+
+      DEBUG(`ADD: ${in1} ${in2}`);
+
+      set(vm, modes[2], params[2], in1 + in2);
+    },
+  },
+
+  {
+    name: "MULT",
+    opcode: 2,
+    numargs: 2,
+    numouts: 1,
+    fn(modes, params, vm) {
+      const in1 = get(vm, modes[0], params[0]);
+      const in2 = get(vm, modes[1], params[1]);
+
+      DEBUG(`MULT: ${in1} ${in2}`);
+
+      set(vm, modes[2], params[2], in1 * in2);
+    },
+  },
+
+  {
+    name: "INPUT",
+    opcode: 3,
+    numargs: 0,
+    numouts: 1,
+    fn(modes, params, vm) {
+      if (vm.inputs.length === 0) {
+        vm.shouldSuspend = true;
+        return;
+      }
+
+      const input = vm.inputs.shift();
+      ASSERT(Number.isInteger(input), "Received non-integer input");
+      DEBUG(`INPUT: ${input} ${params[0]}`);
+
+      set(vm, modes[0], params[0], input);
+    },
+  },
+
+  {
+    name: "OUTPUT",
+    opcode: 4,
+    numargs: 1,
+    numouts: 0,
+    fn(modes, params, vm) {
+      const output = get(vm, modes[0], params[0]);
+      vm.outputs.push(output);
+      DEBUG("OUTPUT:", output);
+    },
+  },
+
+  {
+    name: "JNZ",
+    opcode: 5,
+    numargs: 2,
+    numouts: 0,
+    fn(modes, params, vm) {
+      const in1 = get(vm, modes[0], params[0]);
+      const in2 = get(vm, modes[1], params[1]);
+
+      DEBUG(`JNZ: ${in1} ${in2}`);
+
+      if (in1 !== 0) {
+        DEBUG(`JUMPING TO ${in2}`);
+        return in2;
+      }
+    },
+  },
+
+  {
+    name: "JZ",
+    opcode: 6,
+    numargs: 2,
+    numouts: 0,
+    fn(modes, params, vm) {
+      const in1 = get(vm, modes[0], params[0]);
+      const in2 = get(vm, modes[1], params[1]);
+
+      DEBUG(`JZ: ${in1} ${in2}`);
+
+      if (in1 === 0) {
+        DEBUG(`JUMPING TO ${in2}`);
+        return in2;
+      }
+    },
+  },
+
+  {
+    name: "LT",
+    opcode: 7,
+    numargs: 2,
+    numouts: 1,
+    fn(modes, params, vm) {
+      const in1 = get(vm, modes[0], params[0]);
+      const in2 = get(vm, modes[1], params[1]);
+
+      const value = in1 < in2 ? 1 : 0;
+
+      DEBUG(`LT: ${in1} ${in2} ${value}`);
+
+      set(vm, modes[2], params[2], value);
+    },
+  },
+
+  {
+    name: "EQ",
+    opcode: 8,
+    numargs: 2,
+    numouts: 1,
+    fn(modes, params, vm) {
+      const in1 = get(vm, modes[0], params[0]);
+      const in2 = get(vm, modes[1], params[1]);
+
+      const value = in1 === in2 ? 1 : 0;
+
+      DEBUG(`EQ: ${in1} ${in2} ${value}`);
+
+      set(vm, modes[2], params[2], value);
+    },
+  },
+
+  {
+    name: "RBS",
+    opcode: 9,
+    numargs: 1,
+    numouts: 0,
+    fn(modes, params, vm) {
+      const in1 = get(vm, modes[0], params[0]);
+      DEBUG(`RBS: ${in1}`);
+
+      vm.rb = vm.rb + in1;
+    },
+  },
+
+  {
+    name: "EXIT",
+    opcode: 99,
+    numargs: 0,
+    numouts: 0,
+    fn(modes, params, vm) {
+      DEBUG("HALT");
+      vm.shouldExit = true;
+    },
+  },
+]);
+
 function ensureSize(vm, size) {
   if (vm.mem.length < size - 1) {
     DEBUG("VM MEM TOO SMALL");
-    vm.mem = arrayPad(vm.mem, Math.floor(size * 1.5), 0);
+    vm.mem = arrayPad(vm.mem, size * 2, 0);
   }
 }
 
-export function get(vm: VmState, mode: MemMode, value: number) {
+function get(vm: VmState, mode: MemMode, value: number) {
   switch (mode) {
     case IMMEDIATE_MODE:
       DEBUG(`GET: immediate ${value}`);
@@ -62,7 +219,7 @@ export function get(vm: VmState, mode: MemMode, value: number) {
   }
 }
 
-export function set(vm: VmState, mode: MemMode, position: number, value) {
+function set(vm: VmState, mode: MemMode, position: number, value) {
   ASSERT(mode !== IMMEDIATE_MODE, "set does not work with immediate mode");
 
   switch (mode) {
@@ -89,15 +246,12 @@ function getOpcode(value: number) {
   return [intCombine(parts.slice(-2)), parts.slice(0, -2).reverse()];
 }
 
-function getInstruction(mem: Mem, pc, ops: OpMap) {
+function getInstruction(mem: Mem, pc) {
   const [opcode, rawModes] = getOpcode(mem[pc]);
 
-  ASSERT(
-    ops.has(opcode as OpCode),
-    `FATAL: Invalid opcode found at ${pc}: '${opcode}'`,
-  );
+  ASSERT(ops.has(opcode), `FATAL: Invalid opcode found at ${pc}: '${opcode}'`);
 
-  const op = ops.get(opcode as OpCode);
+  const op = ops.get(opcode);
 
   const [, ...params] = mem.slice(pc, pc + op.len);
   const modes = arrayPad(rawModes, op.numargs, 0);
@@ -105,9 +259,9 @@ function getInstruction(mem: Mem, pc, ops: OpMap) {
   return { opcode, modes, params };
 }
 
-export function OPMAP(oplist: OpInput[]): OpMap {
+function OPMAP(oplist: OpInput[]): OpMap {
   return oplist.reduce((acc, op) => {
-    acc.set(op.opcode as OpCode, {
+    acc.set(op.opcode, {
       ...op,
       len: op.numargs + op.numouts + 1,
     });
@@ -116,7 +270,7 @@ export function OPMAP(oplist: OpInput[]): OpMap {
   }, new Map<OpCode, Op>());
 }
 
-export function newVM({
+export function make({
   program = [],
   inputs = [],
   initialMemSize = 8192,
@@ -133,34 +287,25 @@ export function newVM({
   };
 }
 
-export function runProgram(ops: OpMap, vmState: VmState) {
-  while (!vmState.shouldExit) {
-    const { opcode, modes, params } = getInstruction(
-      vmState.mem,
-      vmState.pc,
-      ops,
-    );
+export function run(vm: VmState) {
+  while (!vm.shouldExit) {
+    const { opcode, modes, params } = getInstruction(vm.mem, vm.pc);
 
-    ASSERT(
-      ops.has(opcode as OpCode),
-      `Invalid opcode found: '${opcode} at pc:${vmState.pc}'`,
-    );
+    const op = ops.get(opcode);
+    DEBUG(`\nOP[${vm.pc}]: o:${op.name} m:${modes} p:${params} `);
 
-    const op = ops.get(opcode as OpCode);
-    DEBUG(`\nOP[${vmState.pc}]: o:${op.name} m:${modes} p:${params} `);
+    const jump = op.fn(modes, params, vm);
 
-    const jump = op.fn(modes, params, vmState);
-
-    if (vmState.shouldSuspend) {
+    if (vm.shouldSuspend) {
       break;
     }
 
     if (Number.isInteger(jump)) {
-      vmState.pc = jump;
+      vm.pc = jump;
     } else {
-      vmState.pc += op.len;
+      vm.pc += op.len;
     }
   }
 
-  return vmState;
+  return vm;
 }
