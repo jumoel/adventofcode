@@ -1,0 +1,7 @@
+(library
+ (name util)
+ (libraries
+		core
+		console.lib
+	)
+)

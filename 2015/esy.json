@@ -1,0 +1,12 @@
+{
+  "name": "aoc2015",
+  "scripts": { "watch": "esy dune build --watch" },
+  "dependencies": {
+    "@opam/core": "v0.13.0",
+    "@opam/dune": "*",
+    "@opam/merlin": "*",
+    "@opam/reason": "3.5.2",
+    "@reason-native/console": "^0.1.0",
+    "ocaml": "~4.8.1000"
+  }
+}

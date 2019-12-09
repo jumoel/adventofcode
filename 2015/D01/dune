@@ -1,0 +1,8 @@
+(executable
+	(name D01)
+	(libraries
+		core
+		console.lib
+		util
+	)
+)
