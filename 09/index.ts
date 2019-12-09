@@ -1,6 +1,6 @@
 import { permutations, last } from "../util/array";
 
-import { run, make } from "./vm";
+import * as VM from "./vm";
 
 if (require.main === module) {
   const { readInput } = require("../util/readInput");
@@ -9,9 +9,9 @@ if (require.main === module) {
     .split(",")
     .map(Number);
 
-  const vm1 = run(make({ program, inputs: [1] }));
+  const vm1 = VM.run(VM.make({ program, inputs: [1] }));
   console.log("PART 1:", vm1.outputs);
 
-  const vm2 = run(make({ program, inputs: [2] }));
+  const vm2 = VM.run(VM.make({ program, inputs: [2] }));
   console.log("PART 2:", vm2.outputs);
 }
