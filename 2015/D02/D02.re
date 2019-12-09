@@ -4,20 +4,19 @@ let part1 = input =>
        let sizes = [l * w, w * h, h * l];
 
        2
-       * List.fold_left((a, b) => a + b, 0, sizes)
+       * List.fold_left(Util.Int.add, 0, sizes)
        + List.fold_left(min, max_int, sizes);
      })
-  |> List.fold_left((a, b) => a + b, 0);
+  |> List.fold_left(Util.Int.add, 0);
 
 let part2 = input =>
   input
   |> List.map(((l, w, h)) => {
        let shortest =
          [l, w, h] |> List.sort(Int.compare) |> Core.List.take(_, 2);
-
-       2 * List.fold_left((a, b) => a + b, 0, shortest) + l * w * h;
+       2 * List.fold_left(Util.Int.add, 0, shortest) + l * w * h;
      })
-  |> List.fold_left((a, b) => a + b, 0);
+  |> List.fold_left(Util.Int.add, 0);
 
 let () = {
   let input =
