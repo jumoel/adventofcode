@@ -1,5 +1,3 @@
-import { permutations, last } from "../util/array";
-
 import * as VM from "./vm";
 
 if (require.main === module) {
