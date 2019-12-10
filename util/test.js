@@ -11,7 +11,14 @@ function ASSERT(cond, message) {
   }
 }
 
+function logIdent(obj) {
+  console.log(obj);
+
+  return obj;
+}
+
 module.exports = {
   DEBUG,
   ASSERT,
+  logIdent,
 };

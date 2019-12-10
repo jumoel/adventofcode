@@ -68,6 +68,24 @@ function transpose(arr) {
   return arr[0].map((_, column) => arr.map(row => row[column]));
 }
 
+function flatten(arr) {
+  return arr.reduce((acc, elem) => {
+    return acc.concat(elem);
+  }, []);
+}
+
+function map(fn) {
+  return arr => arr.map(fn);
+}
+
+function filter(fn) {
+  return arr => arr.filter(fn);
+}
+
+function reduce(fn, init) {
+  return arr => arr.reduce(fn, init);
+}
+
 module.exports = {
   arrayPad,
   permutations,
@@ -75,4 +93,8 @@ module.exports = {
   chunk,
   matches,
   transpose,
+  flatten,
+  map,
+  filter,
+  reduce,
 };
