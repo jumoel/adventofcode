@@ -316,3 +316,14 @@ export function parseProgram(input) {
     .split(",")
     .map(Number);
 }
+
+export function loop(vm, handleInput, handleOutput) {
+  while (!vm.shouldExit) {
+    const inputs = handleInput();
+    vm.inputs = vm.inputs.concat(inputs);
+    vm.shouldSuspend = false;
+    VM.run(vm);
+
+    handleOutput(vm.outputs);
+  }
+}

@@ -49,39 +49,37 @@ function paint(program, initialColor) {
 
   let vm = VM.make({ program });
 
-  const painted = new Set();
   const colors = {
     [c(0, 0)]: initialColor,
   };
 
-  while (!vm.shouldExit) {
-    const currentColor = colors[c(x, y)] || BLACK;
+  function input() {
+    return [colors[c(x, y)] || BLACK];
+  }
 
-    vm.inputs.push(currentColor);
-    vm.shouldSuspend = false;
-    VM.run(vm);
-
+  function output(output) {
     ASSERT(vm.outputs.length === 2, "VM output seems wrong");
 
     const color = vm.outputs.shift();
     const rotation = vm.outputs.shift();
 
-    painted.add(c(x, y));
     colors[c(x, y)] = color;
 
     direction = newDirection(direction, rotation);
     [x, y] = newPos(x, y, direction);
   }
 
-  return { painted, colors };
+  VM.loop(vm, input, output);
+
+  return colors;
 }
 
 function part1(program) {
-  return paint(program, BLACK).painted.size;
+  return Object.entries(paint(program, BLACK)).length;
 }
 
 function part2(program) {
-  const { colors } = paint(program, WHITE);
+  const colors = paint(program, WHITE);
 
   const colorEntries = Object.entries(colors).map(([coord, value]) => {
     const [x, y] = coord.split(",").map(Number);
