@@ -1,5 +1,4 @@
-import { trim, toLines, toChars } from "../util/string";
-import { flatten, map, filter, reduce, make2d } from "../util/array";
+import { map, reduce, make2d } from "../util/array";
 import { compose } from "../util/fp";
 import { ASSERT, logIdent } from "../util/test";
 import { imageToStr } from "../util/image";
