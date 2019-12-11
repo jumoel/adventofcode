@@ -86,6 +86,10 @@ function reduce(fn, init) {
   return arr => arr.reduce(fn, init);
 }
 
+function make2d(sizeX, sizeY, value) {
+  return new Array(sizeY).fill(null).map(() => new Array(sizeX).fill(value));
+}
+
 module.exports = {
   arrayPad,
   permutations,
@@ -97,4 +101,5 @@ module.exports = {
   map,
   filter,
   reduce,
+  make2d,
 };
