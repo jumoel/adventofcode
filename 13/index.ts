@@ -42,6 +42,9 @@ async function part2(program: number[]) {
   const newProgram = [2, ...program.slice(1)];
   let vm = VM.make({ program: newProgram });
   const screen = make2d(50, 23, 0);
+  let score = 0;
+  let paddleX = 0;
+  let ballX = 0;
 
   const readline = require("readline");
   const rl = readline.createInterface({
@@ -50,23 +53,22 @@ async function part2(program: number[]) {
   });
 
   async function input() {
-    const answer = await new Promise(resolve => {
-      rl.question("DIR? (L,R,nothing) ", dir => {
-        // rl.close();
-        if (dir === "L") {
-          resolve(-1);
-        } else if (dir === "R") {
-          resolve(1);
-        } else {
-          resolve(0);
-        }
-      });
-    });
+    // const answer = await new Promise(resolve => {
+    //   rl.question("DIR? (L,R,nothing) ", dir => {
+    //     // rl.close();
+    //     if (dir === "L") {
+    //       resolve(-1);
+    //     } else if (dir === "R") {
+    //       resolve(1);
+    //     } else {
+    //       resolve(0);
+    //     }
+    //   });
+    // });
 
-    return [answer];
+    const diff = ballX - paddleX;
+    return [diff === 0 ? 0 : diff / Math.abs(diff)];
   }
-
-  let score = 0;
 
   function output(output) {
     ASSERT(output.length % 3 === 0, "VM output seems wrong");
@@ -75,6 +77,14 @@ async function part2(program: number[]) {
       const x = output.shift();
       const y = output.shift();
       const type = output.shift();
+
+      if (type === 3) {
+        paddleX = x;
+      }
+
+      if (type === 4) {
+        ballX = x;
+      }
 
       if (x === -1 && y === 0) {
         score = type;
