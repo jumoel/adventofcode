@@ -4,4 +4,3 @@ yarn-error.log
 *.bs.js
 lib/
 .vscode/
-input.txt

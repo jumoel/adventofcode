@@ -317,9 +317,9 @@ export function parseProgram(input) {
     .map(Number);
 }
 
-export async function loop(vm, handleInput, handleOutput) {
+export function loop(vm, handleInput, handleOutput) {
   while (!vm.shouldExit) {
-    const inputs = await handleInput();
+    const inputs = handleInput();
     vm.inputs = vm.inputs.concat(inputs);
     vm.shouldSuspend = false;
     run(vm);
