@@ -83,8 +83,8 @@ function part1(input) {
 
 function part2(input) {
   const ORE_MAX = 1000000000000;
-  let min = 1;
-  let max = ORE_MAX;
+  let min = Math.floor(ORE_MAX / oreCost(input, 1));
+  let max = min * 2;
   let best = -1;
 
   while (min != max) {
