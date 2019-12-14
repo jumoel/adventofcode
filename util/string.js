@@ -2,6 +2,10 @@ function trim(str) {
   return str.trim();
 }
 
+function split(where) {
+  return str => str.split(where);
+}
+
 function toLines(str) {
   return str.split("\n");
 }
@@ -14,4 +18,5 @@ module.exports = {
   trim,
   toLines,
   toChars,
+  split,
 };

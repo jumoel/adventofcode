@@ -90,6 +90,23 @@ function make2d(sizeX, sizeY, value) {
   return new Array(sizeY).fill(null).map(() => new Array(sizeX).fill(value));
 }
 
+function concat(a, b) {
+  return a.concat(b);
+}
+
+function segment(pred) {
+  return arr =>
+    arr.reduce(
+      (acc, elem) => {
+        const idx = pred(elem) ? 0 : 1;
+
+        acc[idx].push(elem);
+
+        return acc;
+      },
+      [[], []],
+    );
+}
 module.exports = {
   arrayPad,
   permutations,
@@ -102,4 +119,6 @@ module.exports = {
   filter,
   reduce,
   make2d,
+  concat,
+  segment,
 };
