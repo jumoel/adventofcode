@@ -1,12 +1,6 @@
-import * as readline from "readline";
-import { map, reduce, make2d, concat } from "../util/array";
-import { compose } from "../util/fp";
-import { ASSERT, logIdent } from "../util/test";
-import { imageToStr } from "../util/image";
 import { clone } from "../util/obj";
 
 import * as VM from "./vm";
-import { access } from "../../../Library/Caches/typescript/3.7/node_modules/@types/graceful-fs";
 
 function c([x, y]: [number, number]) {
   if (Array.isArray(x)) {
@@ -33,7 +27,6 @@ const DIRS = {
 };
 
 function runVMWithInput(vm: VM.VmState, input) {
-  let output = null;
   vm.inputs = vm.inputs.concat(input);
   vm.shouldSuspend = false;
   VM.run(vm);
@@ -88,34 +81,6 @@ function part1(program) {
   }
 
   return { ...result, world };
-}
-
-function worldMapToArr(world) {
-  const entries = Object.entries(world);
-  const [minX, minY, maxX, maxY] = entries.reduce(
-    ([minX, minY, maxX, maxY], [key, value]) => {
-      const [x, y] = key.split(",").map(Number);
-
-      return [
-        Math.min(minX, x),
-        Math.min(minY, y),
-        Math.max(maxX, x),
-        Math.max(maxY, y),
-      ];
-    },
-    [Infinity, Infinity, -Infinity, -Infinity],
-  );
-
-  return entries.reduce((acc, [key, value]) => {
-    const [x, y] = key.split(",").map(Number);
-
-    ASSERT(x - minX >= 0, "neg X");
-    ASSERT(y - minY >= 0, "neg Y");
-
-    acc[y - minY][x - minX] = value;
-
-    return acc;
-  }, make2d(maxX - minX + 1, maxY - minY + 1, 0));
 }
 
 function part2(program) {
