@@ -107,6 +107,11 @@ function segment(pred) {
       [[], []],
     );
 }
+
+function sum(initial) {
+  return arr => arr.reduce((a, b) => a + b, initial);
+}
+
 module.exports = {
   arrayPad,
   permutations,
@@ -121,4 +126,5 @@ module.exports = {
   make2d,
   concat,
   segment,
+  sum,
 };
