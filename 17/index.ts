@@ -1,3 +1,4 @@
+import * as readline from "readline";
 import { clone } from "../util/obj";
 import { imageToStrFn } from "../util/image";
 import { chunk } from "../util/array";
@@ -95,17 +96,36 @@ function chr(n) {
   return String.fromCharCode(n);
 }
 
-const readline = require("readline");
+function findGreedyPath(img) {
+  const roverPos = img.reduce(
+    (acc, line, y) => {
+      if (acc[0] !== -1) {
+        return acc;
+      }
+
+      const x = line.indexOf(ord("^"));
+
+      if (x !== -1) {
+        return [x, y];
+      }
+
+      return acc;
+    },
+    [-1, -1],
+  );
+}
 
 function part2(program) {
   const { img } = part1(program);
+
+  const greedyPath = findGreedyPath(img);
 
   const screenLength =
     img.length * // Y length is fine, but ...
       (img[0].length + 1) + // ... the image has newlines stripped from each line line, so its count is one off.
     1; // The full screen has a trailing newline, so handle that as well
 
-  const writeOutput = "y"; // or 'y'
+  const writeOutput = "n"; // or 'y'
   const inputs = `A,B,A,C,B,C,B,C,A,B\nL,6,L,4,R,8\nR,8,L,6,L,4,L,10,R,8\nL,4,R,4,L,4,R,8\n${writeOutput}\n`
     .split("")
     .map(ord);
