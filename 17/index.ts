@@ -51,12 +51,12 @@ function part1(program) {
   const imageIsh = runVMWithInput(vm, undefined);
   const lineLength = imageIsh.indexOf(10);
   const rawData = imageIsh.filter(x => x !== NEWLINE);
-  const img2d = chunk(rawData, lineLength);
+  const img = chunk(rawData, lineLength);
 
   const xMax = lineLength - 1;
   const yMax = rawData.length / lineLength - 1;
 
-  const intersections = rawData.reduce((acc, c, i) => {
+  const count = rawData.reduce((acc, c, i) => {
     if (c !== SCAFFOLD) {
       return acc;
     }
@@ -74,7 +74,7 @@ function part1(program) {
       [-1, 0],
       [0, -1],
     ].every(([dx, dy]) => {
-      return img2d[y + dy][x + dx] === SCAFFOLD;
+      return img[y + dy][x + dx] === SCAFFOLD;
     });
 
     if (surrounded) {
@@ -84,7 +84,7 @@ function part1(program) {
     return acc;
   }, 0);
 
-  return intersections;
+  return { img, count };
 }
 
 function ord(c) {
@@ -98,6 +98,13 @@ function chr(n) {
 const readline = require("readline");
 
 function part2(program) {
+  const { img } = part1(program);
+
+  const screenLength =
+    img.length * // Y length is fine, but ...
+      (img[0].length + 1) + // ... the image has newlines stripped from each line line, so its count is one off.
+    1; // The full screen has a trailing newline, so handle that as well
+
   const writeOutput = "y"; // or 'y'
   const inputs = `A,B,A,C,B,C,B,C,A,B\nL,6,L,4,R,8\nR,8,L,6,L,4,L,10,R,8\nL,4,R,4,L,4,R,8\n${writeOutput}\n`
     .split("")
@@ -117,9 +124,10 @@ function part2(program) {
         return;
       }
 
-      // 1782 is the length of the initial output + prompts from the program
-      // Get rid of that
-      if (!initialDone && outputs.length === 1782) {
+      // The program initially writes the full map
+      // 65 is the length of prompts from the program
+      // It messes with the live updating, so don't show it.
+      if (!initialDone && outputs.length === screenLength + 65) {
         vm.outputs = [];
         initialDone = true;
 
@@ -134,7 +142,7 @@ function part2(program) {
         return;
       }
 
-      if (outputs.length % 1717 === 0 && outputs.length > 0) {
+      if (outputs.length % screenLength === 0 && outputs.length > 0) {
         readline.cursorTo(process.stdout, 0, 0);
         readline.clearScreenDown(process.stdout);
         process.stdout.write(outputs.map(chr).join(""));
@@ -154,7 +162,7 @@ if (require.main === module) {
   const { readInput } = require("../util/readInput");
   const program = VM.parseProgram(readInput(__dirname, "input.txt"));
 
-  const p1 = part1(program);
+  const p1 = part1(program).count;
   const p2 = part2(program);
 
   console.log("PART 1:", p1);
