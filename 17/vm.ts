@@ -285,7 +285,7 @@ export function make({
   };
 }
 
-export function run(vm: VmState) {
+export function run(vm: VmState, handleOutput?: (Outputs) => void) {
   while (!vm.shouldExit) {
     const { opcode, modes, params } = getInstruction(vm.mem, vm.pc);
 
@@ -303,6 +303,10 @@ export function run(vm: VmState) {
     } else {
       vm.pc += op.len;
     }
+
+    if (handleOutput) {
+      handleOutput(vm.outputs);
+    }
   }
 
   return vm;
@@ -317,15 +321,15 @@ export function parseProgram(input) {
 
 export function loop(
   vm: VmState,
-  handleInput: () => [number],
+  handleInput: () => number[],
   handleOutput: (Outputs) => void,
 ) {
   while (!vm.shouldExit) {
     const inputs = handleInput();
     vm.inputs = vm.inputs.concat(inputs);
     vm.shouldSuspend = false;
-    run(vm);
+    run(vm, handleOutput);
 
-    handleOutput(vm.outputs);
+    // handleOutput(vm.outputs);
   }
 }

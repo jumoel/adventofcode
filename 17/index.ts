@@ -3,6 +3,7 @@ import { imageToStrFn } from "../util/image";
 import { chunk } from "../util/array";
 
 import * as VM from "./vm";
+import { write } from "../../../Library/Caches/typescript/3.7/node_modules/@types/graceful-fs";
 
 function c([x, y]: [number, number]) {
   if (Array.isArray(x)) {
@@ -83,18 +84,79 @@ function part1(program) {
     return acc;
   }, 0);
 
-  console.log(intersections);
-
-  return imageToStrFn(img2d, c => String.fromCharCode(c));
+  return intersections;
 }
 
-function part2(program) {}
+function ord(c) {
+  return c.charCodeAt(0);
+}
+
+function chr(n) {
+  return String.fromCharCode(n);
+}
+
+const readline = require("readline");
+
+function part2(program) {
+  const writeOutput = "y"; // or 'y'
+  const inputs = `A,B,A,C,B,C,B,C,A,B\nL,6,L,4,R,8\nR,8,L,6,L,4,L,10,R,8\nL,4,R,4,L,4,R,8\n${writeOutput}\n`
+    .split("")
+    .map(ord);
+
+  let vm = VM.make({ program: [2, ...program.slice(1)] });
+
+  let initialDone = false;
+
+  VM.loop(
+    vm,
+    () => {
+      return [inputs.shift()];
+    },
+    outputs => {
+      if (writeOutput !== "y") {
+        return;
+      }
+
+      // 1782 is the length of the initial output + prompts from the program
+      // Get rid of that
+      if (!initialDone && outputs.length === 1782) {
+        vm.outputs = [];
+        initialDone = true;
+
+        const blank = "\n".repeat(process.stdout.rows);
+        process.stdout.write(blank);
+        readline.cursorTo(process.stdout, 0, 0);
+        readline.clearScreenDown(process.stdout);
+        return;
+      }
+
+      if (!initialDone) {
+        return;
+      }
+
+      if (outputs.length % 1717 === 0 && outputs.length > 0) {
+        readline.cursorTo(process.stdout, 0, 0);
+        readline.clearScreenDown(process.stdout);
+        process.stdout.write(outputs.map(chr).join(""));
+        vm.outputs = [];
+      }
+
+      if (vm.shouldExit) {
+        return;
+      }
+    },
+  );
+
+  return vm.outputs.pop();
+}
 
 if (require.main === module) {
   const { readInput } = require("../util/readInput");
   const program = VM.parseProgram(readInput(__dirname, "input.txt"));
 
-  console.log("PART 1:");
-  process.stdout.write(part1(program));
-  // console.log("PART 2:", part2(program));
+  const p1 = part1(program);
+  const p2 = part2(program);
+
+  console.log("PART 1:", p1);
+  console.log("PART 2:", p2);
 }
