@@ -1,34 +1,10 @@
 import * as readline from "readline";
-import { clone } from "../util/obj";
-import { imageToStrFn } from "../util/image";
 import { chunk } from "../util/array";
+import { ASSERT } from "../util/test";
+import { imageToStrFn } from "../util/image";
 
 import * as VM from "./vm";
-import { write } from "../../../Library/Caches/typescript/3.7/node_modules/@types/graceful-fs";
-
-function c([x, y]: [number, number]) {
-  if (Array.isArray(x)) {
-    return `${x[0]}.${x[1]}`;
-  }
-  return `${x},${y}`;
-}
-
-const HIT_WALL = 0;
-const MOVED = 1;
-const FOUND_OXYGEN = 2;
-
-type Dir = 1 | 2 | 3 | 4;
-const NORTH: Dir = 1;
-const SOUTH: Dir = 2;
-const WEST: Dir = 3;
-const EAST: Dir = 4;
-
-const DIRS = {
-  [NORTH]: [0, 1],
-  [SOUTH]: [0, -1],
-  [EAST]: [1, 0],
-  [WEST]: [-1, 0],
-};
+import { deepStrictEqual, AssertionError } from "assert";
 
 function runVMWithInput(vm: VM.VmState, input) {
   vm.inputs = vm.inputs.concat(input);
@@ -38,14 +14,8 @@ function runVMWithInput(vm: VM.VmState, input) {
   return vm.outputs;
 }
 
-function go(x: number, y: number, dir: Dir): [number, number] {
-  const [dx, dy] = DIRS[dir];
-  return [x + dx, y + dy];
-}
-
 const SCAFFOLD = 35;
 const NEWLINE = 10;
-const EMPTY_SPACE = 46;
 
 function part1(program) {
   const vm = VM.make({ program });
@@ -96,8 +66,88 @@ function chr(n) {
   return String.fromCharCode(n);
 }
 
+const UP = 0;
+const LEFT = 1;
+const DOWN = 2;
+const RIGHT = 3;
+
+const RLEFT = 1;
+const RRIGHT = -1;
+
+// Up and down are reversed due to top-to bottom Y coord
+const DIRS = [
+  [0, -1],
+  [-1, 0],
+  [0, 1],
+  [1, 0],
+];
+
+function canMoveForward(dir, [x, y], img) {
+  const d = DIRS[dir];
+
+  const newX = x + d[0];
+  const newY = y + d[1];
+
+  if (newY < 0 || newY >= img.length) {
+    return false;
+  }
+
+  if (newX < 0 || newX >= img[0].length) {
+    return false;
+  }
+
+  return img[newY][newX] === SCAFFOLD;
+}
+
+function c(x, y) {
+  return `${x},${y}`;
+}
+
+function moveForward(dir, [x, y], visited) {
+  const d = DIRS[dir];
+
+  const newX = x + d[0];
+  const newY = y + d[1];
+
+  const newRoverPos = [newX, newY];
+  const ds = visited.has(c(x, y)) ? 0 : 1;
+
+  visited.add(c(x, y));
+
+  return { newRoverPos, ds };
+}
+
+function rotate(dir, rotation) {
+  return (dir + 4 + rotation) % 4;
+}
+
+function canRotate(dir, rot, [x, y], img) {
+  const newDir = rotate(dir, rot);
+  const d = DIRS[newDir];
+
+  const candX = x + d[0];
+  const candY = y + d[1];
+
+  if (candX < 0 || candX >= img[0].length || candY < 0 || candY >= img.length) {
+    return false;
+  }
+
+  // console.log({
+  //   dir,
+  //   rot,
+  //   newDir,
+  //   d,
+  //   x,
+  //   y,
+  //   candX,
+  //   candY,
+  //   content: img[candY][candX],
+  // });
+  return img[candY][candX] === SCAFFOLD;
+}
+
 function findGreedyPath(img) {
-  const roverPos = img.reduce(
+  let roverPos = img.reduce(
     (acc, line, y) => {
       if (acc[0] !== -1) {
         return acc;
@@ -113,12 +163,73 @@ function findGreedyPath(img) {
     },
     [-1, -1],
   );
+
+  let scaffoldCount = img.reduce((acc, line) => {
+    return acc + line.filter(x => x === SCAFFOLD).length;
+  }, 0);
+
+  let dir = UP;
+  const actions = [];
+  const visited = new Set();
+
+  while (scaffoldCount > 0) {
+    if (canMoveForward(dir, roverPos, img)) {
+      actions.push("F");
+      const { newRoverPos, ds } = moveForward(dir, roverPos, visited);
+
+      scaffoldCount -= ds;
+      roverPos = newRoverPos;
+    } else if (canRotate(dir, RLEFT, roverPos, img)) {
+      actions.push("L");
+      dir = rotate(dir, RLEFT);
+    } else if (canRotate(dir, RRIGHT, roverPos, img)) {
+      actions.push("R");
+      dir = rotate(dir, RRIGHT);
+    } else {
+      ASSERT(false, "Should never happen");
+    }
+  }
+
+  return actions;
+}
+
+function compress(path) {
+  return path.reduce((acc, elem) => {
+    if (elem !== "F") {
+      acc.push(elem);
+      return acc;
+    }
+
+    if (acc.length === 0) {
+      acc.push(1);
+      return acc;
+    }
+
+    const last = acc[acc.length - 1];
+    if (Number.isInteger(last)) {
+      acc[acc.length - 1] += 1;
+    } else {
+      acc.push(1);
+    }
+
+    return acc;
+  }, []);
+}
+
+function subroutine(compressed) {
+  /**
+   * - convert to <rotation, forward> chunks
+   * - convert compressed to list of single character command refs
+   * - do recursive function to reduce list of command refs to max 3 subcommands
+   */
 }
 
 function part2(program) {
   const { img } = part1(program);
 
   const greedyPath = findGreedyPath(img);
+  const compressed = compress(greedyPath);
+  const subroutined = subroutine(compressed);
 
   const screenLength =
     img.length * // Y length is fine, but ...
@@ -140,6 +251,7 @@ function part2(program) {
       return [inputs.shift()];
     },
     outputs => {
+      // @ts-ignore
       if (writeOutput !== "y") {
         return;
       }
