@@ -1,10 +1,8 @@
 import * as readline from "readline";
 import { chunk } from "../util/array";
 import { ASSERT } from "../util/test";
-import { imageToStrFn } from "../util/image";
 
 import * as VM from "./vm";
-import { deepStrictEqual, AssertionError } from "assert";
 
 function runVMWithInput(vm: VM.VmState, input) {
   vm.inputs = vm.inputs.concat(input);
@@ -132,17 +130,6 @@ function canRotate(dir, rot, [x, y], img) {
     return false;
   }
 
-  // console.log({
-  //   dir,
-  //   rot,
-  //   newDir,
-  //   d,
-  //   x,
-  //   y,
-  //   candX,
-  //   candY,
-  //   content: img[candY][candX],
-  // });
   return img[candY][candX] === SCAFFOLD;
 }
 
