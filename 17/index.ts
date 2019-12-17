@@ -217,11 +217,40 @@ function compress(path) {
 }
 
 function subroutine(compressed) {
-  /**
-   * - convert to <rotation, forward> chunks
-   * - convert compressed to list of single character command refs
-   * - do recursive function to reduce list of command refs to max 3 subcommands
-   */
+  const commands = String(compressed);
+
+  for (let a = 1; a <= 20; a++) {
+    for (let b = 1; b <= 20; b++) {
+      for (let c = 1; c <= 20; c++) {
+        const A = commands.substr(0, a);
+        const withoutA = commands.replace(new RegExp(A + ",?", "g"), "");
+
+        const B = withoutA.substr(0, b);
+        const withoutB = withoutA.replace(new RegExp(B + ",?", "g"), "");
+
+        const C = withoutB.substr(0, c);
+        const withoutC = withoutB.replace(new RegExp(C + ",?", "g"), "");
+
+        if (withoutC.length === 0) {
+          return (
+            commands
+              .replace(new RegExp(A, "g"), "A")
+              .replace(new RegExp(B, "g"), "B")
+              .replace(new RegExp(C, "g"), "C") +
+            "\n" +
+            A +
+            "\n" +
+            B +
+            "\n" +
+            C +
+            "\n"
+          );
+        }
+      }
+    }
+  }
+
+  ASSERT(false, "No solution found");
 }
 
 function part2(program) {
@@ -237,9 +266,8 @@ function part2(program) {
     1; // The full screen has a trailing newline, so handle that as well
 
   const writeOutput = "n"; // or 'y'
-  const inputs = `A,B,A,C,B,C,B,C,A,B\nL,6,L,4,R,8\nR,8,L,6,L,4,L,10,R,8\nL,4,R,4,L,4,R,8\n${writeOutput}\n`
-    .split("")
-    .map(ord);
+
+  const inputs = `${subroutined}${writeOutput}\n`.split("").map(ord);
 
   let vm = VM.make({ program: [2, ...program.slice(1)] });
 
