@@ -2,6 +2,10 @@ function imageToStr(arr, colors = { 1: "▒", 0: " " }) {
   return arr.map(line => line.map(v => colors[v] || v).join("")).join("\n");
 }
 
+function imageToStrFn(arr, fn) {
+  return arr.map(line => line.map(fn).join("")).join("\n");
+}
+
 function worldMapToArr(world) {
   const entries = Object.entries(world);
   const [minX, minY, maxX, maxY] = entries.reduce(
@@ -32,5 +36,6 @@ function worldMapToArr(world) {
 
 module.exports = {
   imageToStr,
+  imageToStrFn,
   worldMapToArr,
 };
