@@ -4,14 +4,24 @@ const { map, sum, reduce, flatten, filter } = require("../util/array");
 const { clone } = require("../util/obj");
 const { ASSERT, logIdent } = require("../util/test");
 
-function makeWorld(input) {
+function clean(input) {
   return compose(trim, toLines, map(trim), map(split("")))(input);
 }
 
-function findInWorld(world, fn) {
+function c(x, y) {
+  return `${x},${y}`;
+}
+
+const ENTRY = "@";
+const WALL = "#";
+const PASSAGE = ".";
+const KEY_REGEX = /[a-z]/;
+const DOOR_REGEX = /[A-Z]/;
+
+function findInWorld(world, needle) {
   for (let y = 0; y < world.length; y++) {
     for (let x = 0; x < world[y].length; x++) {
-      if (fn(world[y][x])) {
+      if (world[y][x] === needle) {
         return [x, y];
       }
     }
@@ -21,57 +31,24 @@ function findInWorld(world, fn) {
 }
 
 function findAllInWorld(world, fn) {
-  const res = [];
+  const result = [];
 
   for (let y = 0; y < world.length; y++) {
     for (let x = 0; x < world[y].length; x++) {
       if (fn(world[y][x])) {
-        res.push([x, y, world[y][x]]);
+        result.push([x, y, world[y][x]]);
       }
     }
   }
 
-  return res;
+  return result;
 }
 
-function k(x, y, l) {
-  return `${l.join(",")};${x},${y}`;
+function pk([x, y], k) {
+  return `${x},${y};${k}`;
 }
 
-const PASSAGE = ".";
-const ENTRY = "@";
-const KEY_REGEX = /[a-z]/;
-const DOOR_REGEX = /[A-Z]/;
-
-function unlockAt(world, [x, y]) {
-  const newWorld = clone(world);
-  const found = newWorld[y][x];
-  const isKey = found.match(KEY_REGEX);
-
-  if (isKey) {
-    newWorld[y][x] = PASSAGE;
-    const [doorX, doorY] = findInWorld(
-      newWorld,
-      x => x === found.toUpperCase(),
-    );
-
-    if (doorX !== -1 && doorY !== -1) {
-      newWorld[doorY][doorX] = PASSAGE;
-    }
-  }
-
-  return [newWorld, isKey && found];
-}
-
-function isPassable(w, [x, y]) {
-  return (
-    w[y][x] === ENTRY ||
-    w[y][x] === PASSAGE ||
-    Boolean(w[y][x].match(KEY_REGEX))
-  );
-}
-
-function makePhoneBook(world, allKeys) {
+function makePhoneBook(world) {
   const seen = {};
   const maxX = world[0].length - 1;
   const maxY = world.length - 1;
@@ -90,14 +67,14 @@ function makePhoneBook(world, allKeys) {
           continue;
         }
 
-        if (world[cy][cx].match(/[a-z]/)) {
-          seen[`${x},${y},${world[cy][cx]}`] = dist;
-        }
-
         if (visited.has(`${cx},${cy}`)) {
           continue;
         }
         visited.add(`${cx},${cy}`);
+
+        if (world[cy][cx].match(/[a-z]/)) {
+          seen[pk([x, y], world[cy][cx])] = dist;
+        }
 
         const next = [
           [0, 1],
@@ -118,61 +95,116 @@ function makePhoneBook(world, allKeys) {
   return seen;
 }
 
-function part1(input) {
-  const world = makeWorld(input);
-  const entry = findInWorld(world, x => x === ENTRY);
-  const allKeys = findAllInWorld(world, x => x.match(KEY_REGEX) !== null);
+function unlock(world, [x, y]) {
+  const newWorld = clone(world);
+  const found = newWorld[y][x];
 
-  const phonebook = makePhoneBook(world, allKeys);
+  newWorld[y][x] = PASSAGE;
 
-  let queue = [[clone(world), entry, [], 0]];
+  if (found.match(KEY_REGEX)) {
+    const door = found.toUpperCase();
+    const [doorX, doorY] = findInWorld(newWorld, door);
 
-  let min = Infinity;
-  const memo = new Set();
-
-  while (queue.length > 0) {
-    const [w, [x, y], seen, dist] = queue.shift();
-    const hk = k(x, y, seen);
-
-    if (memo.has(hk)) {
-      continue;
+    if (doorX !== -1) {
+      newWorld[doorY][doorX] = PASSAGE;
     }
-    memo.add(hk);
-
-    if (seen.length === allKeys.length) {
-      if (dist - 1 < min) {
-        min = dist - 1;
-      }
-
-      continue;
-    }
-
-    const [w2, unlockedKey] = unlockAt(w, [x, y]);
-
-    // don't do this, but find the visible keys from
-    // the current position and use the phonebook to find
-    // the distances to them
-
-    const nextSteps = [
-      [0, 1],
-      [-1, 0],
-      [0, -1],
-      [1, 0],
-    ]
-      .filter(([dx, dy]) => isPassable(w2, [x + dx, y + dy]))
-      .map(([dx, dy]) => {
-        return [
-          clone(w2),
-          [x + dx, y + dy],
-          seen.concat([unlockedKey].filter(Boolean)),
-          dist + 1,
-        ];
-      });
-
-    queue = queue.concat(nextSteps);
   }
 
-  return min;
+  return newWorld;
+}
+
+function findAvailableKeys(world, entry) {
+  const found = [];
+  const queue = [entry];
+
+  const seen = new Set();
+
+  while (queue.length > 0) {
+    const [x, y] = queue.shift();
+
+    if (x < 0 || y < 0 || y >= world.length || x > world[0].length) {
+      continue;
+    }
+
+    const k = `${x},${y}`;
+    if (seen.has(k)) {
+      continue;
+    }
+    seen.add(k);
+
+    const tile = world[y][x];
+
+    if (tile === WALL) {
+      continue;
+    }
+
+    if (tile.match(DOOR_REGEX)) {
+      continue;
+    }
+
+    if (tile.match(KEY_REGEX)) {
+      found.push([tile, x, y]);
+      continue;
+    }
+
+    [
+      [0, 1],
+      [0, -1],
+      [1, 0],
+      [-1, 0],
+    ].forEach(([dx, dy]) => queue.unshift([x + dx, y + dy]));
+  }
+
+  return found;
+}
+
+function hashkey(pos, found) {
+  return `${pos.join(",")};${found.join(",")}`;
+}
+
+function part1(input) {
+  const world = clean(input);
+  const entryPos = findInWorld(world, ENTRY);
+  const allKeys = findAllInWorld(world, x => x.match(KEY_REGEX) !== null);
+  const phonebook = makePhoneBook(world);
+  const ak = new Map();
+
+  const queue = [{ /* q: "", */ pos: entryPos, dist: 0, found: [], world }];
+
+  let minimum = Infinity;
+
+  while (queue.length > 0) {
+    const work = queue.sort((a, b) => a.dist - b.dist).shift();
+
+    const newWorld = unlock(work.world, work.pos);
+    const hk = hashkey(work.pos, work.found.sort());
+
+    if (work.found.length === allKeys.length && work.dist < minimum) {
+      (minimum = work.dist), minimum;
+    }
+
+    if (ak.has(hk)) {
+      continue;
+    }
+
+    const availableKeys = findAvailableKeys(newWorld, work.pos);
+    ak.set(hk, availableKeys);
+
+    for (const k of availableKeys) {
+      const [key, ...pos] = k;
+      const newWork = {
+        pos,
+        // q: work.q + ` ${work.pos.join(",")};${key}`,
+        dist: work.dist + phonebook[pk(work.pos, key)],
+        found: work.found.concat([key]),
+        world: newWorld,
+      };
+
+      queue.push(newWork);
+    }
+  }
+
+  return minimum;
 }
 
 function part2(input) {
