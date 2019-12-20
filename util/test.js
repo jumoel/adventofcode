@@ -6,7 +6,7 @@ function DEBUG() {
 
 function ASSERT(cond, message) {
   if (!cond) {
-    console.error("ASSERT FAIL:", message);
+    console.error(...["ASSERT FAIL:", message]);
     process.exit(1);
   }
 }
