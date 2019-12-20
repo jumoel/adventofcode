@@ -228,8 +228,7 @@ function part2(input) {
     const [x, y] = work.pos;
 
     if (goalX === x && goalY === y && work.level === 0 && work.dist < minDist) {
-      minDist = work.dist;
-      continue;
+      return work.dist;
     }
 
     const tile = get(world, x, y);
@@ -283,9 +282,6 @@ function part2(input) {
 
         nextLevel += nextTile.outer ? -1 : 1;
         [nextX, nextY] = otherPortal.target;
-
-        console.log(nextX, nextY, nextLevel, { nextTile, otherPortal });
-        process.exit(1);
       }
 
       queue.push({
@@ -295,28 +291,13 @@ function part2(input) {
       });
     });
   }
-
-  // for (let y = 0; y < world.length; y++) {
-  //   for (let x = 0; x < world[0].length; x++) {
-  //     if (world[y][x].type === PORTAL) {
-  //       process.stdout.write(world[y][x].outer ? "!" : "@");
-  //     } else {
-  //       process.stdout.write(world[y][x].type);
-  //     }
-  //   }
-  //   process.stdout.write("\n");
-  // }
-
   return minDist;
 }
 
 if (require.main === module) {
   const { readInput } = require("../util/readInput");
-  const input = readInput(__dirname, "test.txt", false);
+  const input = readInput(__dirname, "input.txt", false);
 
-  // const lukp = require("./lukp1");
-  // console.log(lukp(input));
-
-  // console.log("PART 1:", part1(input));
+  console.log("PART 1:", part1(input));
   console.log("PART 2:", part2(input));
 }
