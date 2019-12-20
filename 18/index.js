@@ -48,47 +48,47 @@ function pk([x, y], k) {
   return `${x},${y};${k}`;
 }
 
-function makePhoneBook(world) {
+function makePhoneBook(world, allKeys) {
   const seen = {};
   const maxX = world[0].length - 1;
   const maxY = world.length - 1;
 
-  for (let y = 0; y <= maxY; y++) {
-    for (let x = 0; x <= maxX; x++) {
-      const from = [x, y];
+  for (const origin of allKeys) {
+    const [fromX, fromY, fromKey] = origin;
 
-      const queue = [[from, 0]];
-      const visited = new Set();
+    const queue = [[[fromX, fromY], 0]];
+    const visited = new Set();
 
-      while (queue.length > 0) {
-        const [[cx, cy], dist] = queue.shift();
+    while (queue.length > 0) {
+      const [[cx, cy], dist] = queue.shift();
 
-        if (world[cy][cx] === "#") {
-          continue;
-        }
-
-        if (visited.has(`${cx},${cy}`)) {
-          continue;
-        }
-        visited.add(`${cx},${cy}`);
-
-        if (world[cy][cx].match(/[a-z]/)) {
-          seen[pk([x, y], world[cy][cx])] = dist;
-        }
-
-        const next = [
-          [0, 1],
-          [0, -1],
-          [1, 0],
-          [-1, 0],
-        ]
-          .map(([dx, dy]) => {
-            return [cx + dx, cy + dy];
-          })
-          .filter(([nx, ny]) => nx >= 0 && nx <= maxX && ny >= 0 && ny <= maxY)
-          .filter(([nx, ny]) => world[ny][nx] !== "#")
-          .forEach(pos => queue.push([pos, dist + 1]));
+      if (visited.has(`${cx},${cy}`)) {
+        continue;
       }
+      visited.add(`${cx},${cy}`);
+
+      const tile = world[cy][cx];
+
+      if (tile === WALL) {
+        continue;
+      }
+
+      if (tile.match(KEY_REGEX)) {
+        seen[pk([fromX, fromY], tile)] = dist;
+      }
+
+      [
+        [0, 1],
+        [0, -1],
+        [1, 0],
+        [-1, 0],
+      ]
+        .map(([dx, dy]) => {
+          return [cx + dx, cy + dy];
+        })
+        .filter(([nx, ny]) => nx >= 0 && nx <= maxX && ny >= 0 && ny <= maxY)
+        .filter(([nx, ny]) => world[ny][nx] !== WALL)
+        .forEach(pos => queue.push([pos, dist + 1]));
     }
   }
 
@@ -166,7 +166,10 @@ function part1(input) {
   const world = clean(input);
   const entryPos = findInWorld(world, ENTRY);
   const allKeys = findAllInWorld(world, x => x.match(KEY_REGEX) !== null);
-  const phonebook = makePhoneBook(world);
+  const phonebook = makePhoneBook(
+    world,
+    allKeys.concat([[...entryPos, ENTRY]]),
+  );
   const ak = new Map();
 
   const queue = [{ /* q: "", */ pos: entryPos, dist: 0, found: [], world }];
@@ -174,13 +177,14 @@ function part1(input) {
   let minimum = Infinity;
 
   while (queue.length > 0) {
+    // console.log(queue.length);
     const work = queue.sort((a, b) => a.dist - b.dist).shift();
 
     const newWorld = unlock(work.world, work.pos);
     const hk = hashkey(work.pos, work.found.sort());
 
     if (work.found.length === allKeys.length && work.dist < minimum) {
-      (minimum = work.dist), minimum;
+      minimum = work.dist;
     }
 
     if (ak.has(hk)) {
