@@ -23,9 +23,17 @@ function makeWorld(input) {
   let maxY = world.length;
   let maxX = -Infinity;
 
-  for (const line of world) {
-    if (line.length > maxX) {
-      maxX = line.length;
+  for (let y = 0; y < world.length; y++) {
+    if (world[y].length > maxX) {
+      maxX = world[y].length;
+    }
+  }
+  for (let y = 0; y < world.length; y++) {
+    if (world[y].length < maxX) {
+      world[y] = world[y]
+        .join("")
+        .padEnd(maxX, " ")
+        .split("");
     }
   }
 
@@ -69,8 +77,9 @@ function makeWorld(input) {
         const target = passageOnRight ? [x + 2, y] : [x - 1, y];
         const fake = passageOnRight ? [x, y] : [x + 1, y];
         const real = passageOnRight ? [x + 1, y] : [x, y];
+        const outer = x === 0 || x === maxX - 2;
 
-        set(world, real[0], real[1], { type: PORTAL, name, target });
+        set(world, real[0], real[1], { type: PORTAL, name, target, outer });
         set(world, fake[0], fake[1], { type: EMPTY });
 
         if (!phonebook.has(name)) {
@@ -90,8 +99,9 @@ function makeWorld(input) {
         const target = passageOnBottom ? [x, y + 2] : [x, y - 1];
         const fake = passageOnBottom ? [x, y] : [x, y + 1];
         const real = passageOnBottom ? [x, y + 1] : [x, y];
+        const outer = y === 0 || y === maxY - 2;
 
-        set(world, real[0], real[1], { type: PORTAL, name, target });
+        set(world, real[0], real[1], { type: PORTAL, name, target, outer });
         set(world, fake[0], fake[1], { type: EMPTY });
 
         if (!phonebook.has(name)) {
@@ -115,8 +125,8 @@ function makeWorld(input) {
   return { world, phonebook };
 }
 
-function c(pos) {
-  return pos.join(",");
+function c(pos, level = 0) {
+  return pos.join(",") + ";" + level;
 }
 
 function part1(input) {
@@ -190,13 +200,98 @@ function part1(input) {
   }
 
   return minDist;
+}
 
-  // for (let y = 0; y < world.length; y++) {
-  //   for (let x = 0; x < world[0].length; x++) {
-  //     process.stdout.write(world[y][x].type);
-  //   }
-  //   process.stdout.write("\n");
-  // }
+function part2(input) {
+  const { world, phonebook } = makeWorld(input);
+
+  const entry = phonebook.get("AA")[0];
+  const endPortal = phonebook.get("ZZ")[0];
+  const [goalX, goalY] = get(world, endPortal[0], endPortal[1]).target;
+  const seen = new Set();
+  seen.add(c(entry, 0));
+
+  const queue = [
+    { pos: get(world, entry[0], entry[1]).target, dist: 0, level: 0 },
+  ];
+
+  let minDist = Infinity;
+  while (queue.length > 0) {
+    const work = queue.sort((a, b) => a.dist - b.dist).shift();
+
+    const hk = c(work.pos, work.level);
+    if (seen.has(hk)) {
+      continue;
+    }
+    seen.add(hk);
+
+    const [x, y] = work.pos;
+
+    if (goalX === x && goalY === y && work.level === 0 && work.dist < minDist) {
+      return work.dist;
+    }
+
+    const tile = get(world, x, y);
+
+    ASSERT(tile.type !== EMPTY, "Hit the empty space", x, y, tile);
+
+    if (tile.type === WALL) {
+      continue;
+    }
+
+    [
+      [0, 1],
+      [0, -1],
+      [1, 0],
+      [-1, 0],
+    ].forEach(([dx, dy]) => {
+      let nextX = x + dx;
+      let nextY = y + dy;
+      let nextLevel = work.level;
+
+      if (seen.has(c([nextX, nextY], nextLevel))) {
+        return;
+      }
+
+      const nextTile = get(world, nextX, nextY);
+      // AA and ZZ only work on the outermost level
+      if (nextTile.type === PORTAL) {
+        if (work.level === 0 && nextTile.outer && nextTile.name !== "ZZ") {
+          return;
+        }
+
+        if (
+          work.level > 0 &&
+          nextTile.outer &&
+          (nextTile.name === "ZZ" || nextTile.name === "AA")
+        ) {
+          return;
+        }
+
+        seen.add(c([nextX, nextY], nextLevel));
+
+        if (nextTile.name === "ZZ") {
+          return;
+        }
+
+        const [opX, opY] = phonebook
+          .get(nextTile.name)
+          .filter(([px, py]) => px !== nextX && py !== nextY)
+          .shift();
+        const otherPortal = get(world, opX, opY);
+
+        nextLevel += nextTile.outer ? -1 : 1;
+        [nextX, nextY] = otherPortal.target;
+      }
+
+      queue.push({
+        pos: [nextX, nextY],
+        dist: work.dist + 1,
+        level: nextLevel,
+      });
+    });
+  }
+  return minDist;
 }
 
 if (require.main === module) {
@@ -204,5 +299,5 @@ if (require.main === module) {
   const input = readInput(__dirname, "input.txt", false);
 
   console.log("PART 1:", part1(input));
-  //   console.log("PART 2:", part2(input));
+  console.log("PART 2:", part2(input));
 }
