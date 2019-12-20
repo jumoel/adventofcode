@@ -170,14 +170,13 @@ function part1(input) {
     world,
     allKeys.concat([[...entryPos, ENTRY]]),
   );
-  const ak = new Map();
+  const ak = new Set();
 
   const queue = [{ /* q: "", */ pos: entryPos, dist: 0, found: [], world }];
 
   let minimum = Infinity;
 
   while (queue.length > 0) {
-    // console.log(queue.length);
     const work = queue.sort((a, b) => a.dist - b.dist).shift();
 
     const newWorld = unlock(work.world, work.pos);
@@ -192,7 +191,7 @@ function part1(input) {
     }
 
     const availableKeys = findAvailableKeys(newWorld, work.pos);
-    ak.set(hk, availableKeys);
+    ak.set(hk);
 
     for (const k of availableKeys) {
       const [key, ...pos] = k;
