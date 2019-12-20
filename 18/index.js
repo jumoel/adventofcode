@@ -3,6 +3,7 @@ const { trim, toLines, split } = require("../util/string");
 const { map, sum, reduce, flatten, filter } = require("../util/array");
 const { clone } = require("../util/obj");
 const { ASSERT, logIdent } = require("../util/test");
+const { imageToStrFn } = require("../util/image");
 
 function clean(input) {
   return compose(trim, toLines, map(trim), map(split("")))(input);
@@ -113,7 +114,7 @@ function unlock(world, [x, y]) {
   return newWorld;
 }
 
-function findAvailableKeys(world, entry) {
+function findAvailableKeys(world, entry, everything = false) {
   const found = [];
   const queue = [entry];
 
@@ -139,12 +140,18 @@ function findAvailableKeys(world, entry) {
     }
 
     if (tile.match(DOOR_REGEX)) {
-      continue;
+      if (everything) {
+        found.push([tile, x, y]);
+      } else {
+        continue;
+      }
     }
 
     if (tile.match(KEY_REGEX)) {
       found.push([tile, x, y]);
-      continue;
+      if (!everything) {
+        continue;
+      }
     }
 
     [
@@ -159,7 +166,7 @@ function findAvailableKeys(world, entry) {
 }
 
 function hashkey(pos, found) {
-  return `${pos.join(",")};${found.join(",")}`;
+  return `${pos.join("-")};${found.join(",")}`;
 }
 
 function part1(input) {
@@ -191,7 +198,7 @@ function part1(input) {
     }
 
     const availableKeys = findAvailableKeys(newWorld, work.pos);
-    ak.set(hk);
+    ak.add(hk);
 
     for (const k of availableKeys) {
       const [key, ...pos] = k;
@@ -210,17 +217,103 @@ function part1(input) {
   return minimum;
 }
 
+function modifyPart2(world, [x, y]) {
+  [
+    [-1, -1],
+    [1, -1],
+    [1, 1],
+    [-1, 1],
+  ].forEach(([dx, dy]) => {
+    world[y + dy][x + dx] = "@";
+  });
+
+  [
+    [0, 0],
+    [1, 0],
+    [0, 1],
+    [-1, 0],
+    [0, -1],
+  ].forEach(([dx, dy]) => {
+    world[y + dy][x + dx] = "#";
+  });
+
+  return world;
+}
+
 function part2(input) {
-  return input;
+  const world1 = clean(input);
+  const entryPos = findInWorld(world1, ENTRY);
+  const world = modifyPart2(world1, entryPos);
+
+  const allKeys = findAllInWorld(world, x => x.match(KEY_REGEX) !== null);
+  const allEntries = findAllInWorld(world, x => x === "@").map(([x, y]) => [
+    x,
+    y,
+  ]);
+
+  // TODO: Clear out doors that have keys in other quadrants
+  // using this as a starting point.
+  // allEntries.forEach(([x, y]) => {
+  //   console.log(findAvailableKeys(world, [x, y], true));
+  // });
+  // process.exit(1);
+
+  const phonebook = makePhoneBook(world, allKeys.concat(allEntries));
+  const ak = new Set();
+
+  const queue = [{ /* q: "", */ poss: allEntries, dist: 0, found: [], world }];
+
+  let minimum = Infinity;
+
+  while (queue.length > 0) {
+    const work = queue.sort((a, b) => a.dist - b.dist).shift();
+
+    const newWorld = work.poss.reduce((world, pos) => {
+      return unlock(world, pos);
+    }, work.world);
+
+    const hk = hashkey(work.poss, work.found.sort());
+
+    if (work.found.length === allKeys.length && work.dist < minimum) {
+      minimum = work.dist;
+    }
+
+    if (ak.has(hk)) {
+      continue;
+    }
+
+    const availableKeys = work.poss.map(pos => {
+      return findAvailableKeys(newWorld, pos);
+    });
+    ak.add(hk);
+
+    availableKeys.forEach((keyset, robot) => {
+      for (const k of keyset) {
+        const [key, ...pos] = k;
+        const poss = clone(work.poss);
+        const dist = phonebook[pk(poss[robot], key)];
+
+        poss[robot] = pos;
+        const newWork = {
+          poss,
+          // q: work.q + ` ${work.pos.join(",")};${key}`,
+          dist: work.dist + dist,
+          found: work.found.concat([key]),
+          world: newWorld,
+        };
+
+        queue.push(newWork);
+      }
+    });
+  }
+
+  return minimum;
 }
 
 if (require.main === module) {
   const { readInput } = require("../util/readInput");
   const input = readInput(__dirname, "input.txt");
 
-  const p1 = part1(input);
-  const p2 = part2(input);
-
-  console.log("PART 1:", p1);
-  //   console.log("PART 2:", p2);
+  console.log("PART 1:", part1(input));
+  console.log("PART 2:", part2(input));
 }
