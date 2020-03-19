@@ -8,8 +8,8 @@
     "tscw": "tsc --watch $DAY/**.ts"
   },
   "devDependencies": {
-    "@types/node": "^12.12.14",
-    "jest": "^24.9.0",
+    "@types/node": "^13.9.2",
+    "jest": "^25.1.0",
     "jest-extended": "^0.11.2",
     "prettier": "^1.19.1",
     "typescript": "^3.7.3"
