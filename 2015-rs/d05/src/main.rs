@@ -9,9 +9,7 @@ fn vowel(c: char) -> i32 {
     }
 }
 
-fn main() {
-    let input = fs::read_to_string("d05/input.txt").expect("Something went wrong reading the file");
-
+fn nice1(input: &str) -> usize {
     let forbidden = vec!["ab", "cd", "pq", "xy"];
     let nice = input.lines().filter(|line| {
         if forbidden.iter().any(|f| line.contains(f)) {
@@ -30,7 +28,17 @@ fn main() {
         vowels > 2 && has_double
     });
 
-    println!("Part 1: {}", nice.count());
+    nice.count()
+}
 
-    println!("Part 2: {}", 0);
+fn nice2(input: &str) -> usize {
+    0
+}
+
+fn main() {
+    let input = fs::read_to_string("d05/input.txt").expect("Something went wrong reading the file");
+
+    println!("Part 1: {}", nice1(&input));
+
+    println!("Part 2: {}", nice2(&input));
 }
