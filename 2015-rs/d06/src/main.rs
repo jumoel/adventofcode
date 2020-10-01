@@ -4,6 +4,8 @@ type Range = (usize, usize);
 type From = Range;
 type To = Range;
 const DIM: usize = 1000;
+type Lights<T> = [[T; DIM]; DIM];
+type ModFn<T> = fn(&mut T) -> T;
 
 enum Operation {
 	TurnOff(From, To),
@@ -20,26 +22,19 @@ fn str_to_range(s: &str) -> Range {
 	}
 }
 
-fn part1(input: std::slice::Iter<Operation>) -> i32 {
-	fn op_off(_: bool) -> bool {
-		false
-	}
-
-	fn op_on(_: bool) -> bool {
-		true
-	}
-
-	fn op_toggle(current: bool) -> bool {
-		!current
-	}
-
-	let mut lights = [[false; DIM]; DIM];
-
+fn part<T>(
+	input: std::slice::Iter<Operation>,
+	lights: &mut Lights<T>,
+	op_off: ModFn<T>,
+	op_on: ModFn<T>,
+	op_toggle: ModFn<T>,
+	sum: fn(&T) -> i32,
+) -> i32 {
 	for op in input {
 		let ((x_f, y_f), (x_t, y_t), op_fn): (
 			Range,
 			Range,
-			fn(bool) -> bool,
+			ModFn<T>,
 		) = match op {
 			Operation::TurnOff(f, t) => (*f, *t, op_off),
 			Operation::TurnOn(f, t) => (*f, *t, op_on),
@@ -48,7 +43,9 @@ fn part1(input: std::slice::Iter<Operation>) -> i32 {
 
 		for y in y_f..(y_t + 1) {
 			for x in x_f..(x_t + 1) {
-				lights[y][x] = op_fn(lights[y][x])
+				let cell =
+					lights.get_mut(y).unwrap().get_mut(x).unwrap();
+				*cell = op_fn(cell)
 			}
 		}
 	}
@@ -56,54 +53,60 @@ fn part1(input: std::slice::Iter<Operation>) -> i32 {
 	let mut count = 0;
 	for y in 0..DIM {
 		for x in 0..DIM {
-			count += if lights[y][x] { 1 } else { 0 };
+			let val = lights.get(y).unwrap().get(x).unwrap();
+			count += sum(val);
 		}
 	}
 
 	count
 }
 
+fn part1(input: std::slice::Iter<Operation>) -> i32 {
+	fn op_off(_: &mut bool) -> bool {
+		false
+	}
+
+	fn op_on(_: &mut bool) -> bool {
+		true
+	}
+
+	fn op_toggle(current: &mut bool) -> bool {
+		!*current
+	}
+
+	fn sum(current: &bool) -> i32 {
+		if *current {
+			1
+		} else {
+			0
+		}
+	}
+
+	let mut lights: Lights<bool> = [[false; DIM]; DIM];
+
+	part::<bool>(input, &mut lights, op_off, op_on, op_toggle, sum)
+}
+
 fn part2(input: std::slice::Iter<Operation>) -> i32 {
-	fn op_off(current: i32) -> i32 {
-		std::cmp::max(current - 1, 0)
+	fn op_off(current: &mut i32) -> i32 {
+		std::cmp::max(*current - 1, 0)
 	}
 
-	fn op_on(current: i32) -> i32 {
-		current + 1
+	fn op_on(current: &mut i32) -> i32 {
+		*current + 1
 	}
 
-	fn op_toggle(current: i32) -> i32 {
-		current + 2
+	fn op_toggle(current: &mut i32) -> i32 {
+		*current + 2
 	}
 
-	let mut lights = [[0; DIM]; DIM];
-
-	for op in input {
-		let ((x_f, y_f), (x_t, y_t), op_fn): (
-			Range,
-			Range,
-			fn(i32) -> i32,
-		) = match op {
-			Operation::TurnOff(f, t) => (*f, *t, op_off),
-			Operation::TurnOn(f, t) => (*f, *t, op_on),
-			Operation::Toggle(f, t) => (*f, *t, op_toggle),
-		};
-
-		for y in y_f..(y_t + 1) {
-			for x in x_f..(x_t + 1) {
-				lights[y][x] = op_fn(lights[y][x])
-			}
-		}
+	fn sum(current: &i32) -> i32 {
+		*current
 	}
 
-	let mut count = 0;
-	for y in 0..DIM {
-		for x in 0..DIM {
-			count += lights[y][x]
-		}
-	}
+	let mut lights: Lights<i32> = [[0; DIM]; DIM];
 
-	count
+	part::<i32>(input, &mut lights, op_off, op_on, op_toggle, sum)
 }
 
 fn main() {
