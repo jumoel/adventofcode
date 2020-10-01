@@ -41,8 +41,8 @@ fn part<T>(
 			Operation::Toggle(f, t) => (*f, *t, op_toggle),
 		};
 
-		for y in y_f..(y_t + 1) {
-			for x in x_f..(x_t + 1) {
+		for y in y_f..=y_t {
+			for x in x_f..=x_t {
 				let cell =
 					lights.get_mut(y).unwrap().get_mut(x).unwrap();
 				*cell = op_fn(cell)
