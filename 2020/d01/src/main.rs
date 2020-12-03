@@ -1,34 +1,56 @@
-use std::fs;
+use std::{collections::HashSet, fs};
 
-fn main() {
-	let input = fs::read_to_string("d01/input.txt")
-		.expect("Something went wrong reading the file");
+type Result<T> =
+	::std::result::Result<T, Box<dyn ::std::error::Error>>;
 
-	let mut lines: Vec<i32> = input
-		.split('\n')
-		.map(|f| f.parse::<i32>())
-		.filter_map(|f| f.ok())
-		.collect();
+const TARGET: i32 = 2020;
 
-	lines.sort();
+fn find_pair(s: &HashSet<i32>, val: i32) -> Result<i32> {
+	let mut iter = s.iter();
 
-	let mut iter = lines.iter();
+	loop {
+		let entry = iter.next().ok_or("No pair found")?;
+		let compl = val - entry;
 
-	let res: i32 = 'outer: loop {
-		let front = iter.next().unwrap();
-
-		loop {
-			let back = iter.next_back().unwrap();
-
-			let sum = front + back;
-
-			if sum == 2020 {
-				break 'outer front * back;
-			} else if sum < 2020 {
-				break;
-			}
+		if s.contains(&compl) {
+			println!("Found: {} and {}", entry, compl);
+			return Ok(entry * compl);
 		}
-	};
+	}
+}
 
-	println!("{:?}", res);
+fn part1(s: &HashSet<i32>) -> Result<i32> {
+	find_pair(s, TARGET)
+}
+
+fn part2(s: &HashSet<i32>) -> Result<i32> {
+	let mut iter = s.iter();
+
+	loop {
+		let entry = iter.next().ok_or("No triplet found")?;
+		let rem = TARGET - entry;
+
+		match find_pair(s, rem) {
+			Ok(v) => {
+				println!("Found trip: {}", entry);
+				return Ok(entry * v);
+			}
+			Err(_) => (),
+		}
+	}
+}
+
+fn main() -> Result<()> {
+	let input = fs::read_to_string("d01/input.txt")?;
+
+	let entries: HashSet<i32> =
+		input.lines().map(|l| l.parse()).flatten().collect();
+
+	let part1: i32 = part1(&entries)?;
+	let part2: i32 = part2(&entries)?;
+
+	println!("{:?}", part1);
+	println!("{:?}", part2);
+
+	Ok(())
 }
