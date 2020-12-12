@@ -51,8 +51,7 @@ fn part2(bags: &RuleMap) -> i32 {
 
 fn main() -> Result<()> {
 	let input = fs::read_to_string("d07/input.txt")?;
-
-	let rule_re = Regex::new("^\\s*(\\d)+ (.+) bags?\\.?$").unwrap();
+	let rule_re = Regex::new("^\\s*(\\d)+ (.+) bags?\\.?$")?;
 
 	let bags: RuleMap = input
 		.lines()
