@@ -84,11 +84,20 @@ fn part1(input: &Ops) -> Val {
 	get_wire("a".to_string(), &mut values, input)
 }
 
+fn part2(input: &mut Ops) -> Val {
+	let b_val = part1(input);
+
+	input.insert("b".to_string(), Operation::SETIMM(b_val));
+	let mut values: Vals = HashMap::new();
+
+	get_wire("a".to_string(), &mut values, input)
+}
+
 fn main() {
 	let input = fs::read_to_string("days/d07/input.txt")
 		.expect("Something went wrong reading the file");
 
-	let input: Ops = input
+	let mut input: Ops = input
 		.lines()
 		.filter_map(|line| {
 			let parts = line.split(" ").collect::<Vec<&str>>();
@@ -142,5 +151,5 @@ fn main() {
 		.collect();
 
 	println!("Part 1: {}", part1(&input));
-	// println!("Part 2: {}", part2(input.iter()));
+	println!("Part 2: {}", part2(&mut input));
 }
