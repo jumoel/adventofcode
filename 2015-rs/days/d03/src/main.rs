@@ -21,7 +21,7 @@ fn santa(
 }
 
 fn main() {
-	let input = fs::read_to_string("d03/input.txt")
+	let input = fs::read_to_string("days/d03/input.txt")
 		.expect("Something went wrong reading the file");
 
 	let mut visited1 = HashMap::new();
