@@ -23,8 +23,6 @@ fn ins(values: &mut Vals, w: Wire, val: Val) -> Val {
 }
 
 fn process_wire(w: Wire, values: &mut Vals, ops: &Ops) -> Val {
-	println!("processing [{}]: {:?}", w, ops.get(&w).unwrap());
-
 	match ops.get(&w) {
 		Some(Operation::SETIMM(val)) => ins(values, w, *val),
 
@@ -35,15 +33,15 @@ fn process_wire(w: Wire, values: &mut Vals, ops: &Ops) -> Val {
 
 		Some(Operation::RSHIFT(wire, modifier)) => {
 			let val =
-				get_wire(wire.to_string(), values, ops) >> *modifier;
+				get_wire(wire.to_string(), values, ops) >> modifier;
 			ins(values, w, val)
 		}
 
 		Some(Operation::LSHIFT(wire, modifier)) => {
 			let val =
-				get_wire(wire.to_string(), values, ops) << *modifier;
+				get_wire(wire.to_string(), values, ops) << modifier;
 
-			ins(values, w, val << *modifier)
+			ins(values, w, val)
 		}
 
 		Some(Operation::AND(wire1, wire2)) => {
@@ -72,20 +70,10 @@ fn process_wire(w: Wire, values: &mut Vals, ops: &Ops) -> Val {
 
 fn get_wire(w: Wire, values: &mut Vals, ops: &Ops) -> Val {
 	match w.parse() {
-		Ok(val) => {
-			println!("wire [{}] imm [{}]", w, val);
-			val
-		}
+		Ok(val) => val,
 		_ => match values.get(&w) {
-			Some(val) => {
-				println!("wire [{}] precomputed [{}]", w, *val);
-				*val
-			}
-			_ => {
-				let v = process_wire(w.to_string(), values, ops);
-				println!("wire [{}] value [{}]", w.to_string(), v);
-				v
-			}
+			Some(val) => *val,
+			_ => process_wire(w.to_string(), values, ops),
 		},
 	}
 }
