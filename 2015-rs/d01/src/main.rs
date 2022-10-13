@@ -19,9 +19,9 @@ fn main() {
 			}
 
 			let val = match c {
-				'(' => (acc + 1),
-				')' => (acc - 1),
-				_ => (acc),
+				'(' => acc + 1,
+				')' => acc - 1,
+				_ => acc,
 			};
 
 			Ok(val)
