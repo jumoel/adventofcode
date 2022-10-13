@@ -1,7 +1,7 @@
 use std::fs;
 
 fn main() {
-	let map = fs::read_to_string("d01/input.txt")
+	let map = fs::read_to_string("days/d01/input.txt")
 		.expect("Something went wrong reading the file");
 
 	let part1 = map.chars().fold(0, |acc, c| match c {
