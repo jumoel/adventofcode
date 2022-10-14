@@ -1,5 +1,8 @@
 use std::{collections::HashMap, fs};
 
+type Result<T> =
+	::std::result::Result<T, Box<dyn ::std::error::Error>>;
+
 type Wire = String;
 type Val = u16;
 type Ops = HashMap<Wire, Operation>;
@@ -70,9 +73,8 @@ fn part2(input: &mut Ops) -> Val {
 	get_wire(&"a".to_string(), &mut values, input)
 }
 
-fn main() {
-	let input = fs::read_to_string("days/d07/input.txt")
-		.expect("Something went wrong reading the file");
+fn main() -> Result<()> {
+	let input = fs::read_to_string("days/d07/input.txt")?;
 
 	let mut input: Ops = input
 		.lines()
@@ -121,4 +123,6 @@ fn main() {
 
 	println!("Part 1: {}", part1(&input));
 	println!("Part 2: {}", part2(&mut input));
+
+	Ok(())
 }

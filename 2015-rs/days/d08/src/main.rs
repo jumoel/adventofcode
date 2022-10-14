@@ -1,6 +1,8 @@
+use regex::Regex;
 use std::fs;
 
-use regex::Regex;
+type Result<T> =
+	::std::result::Result<T, Box<dyn ::std::error::Error>>;
 
 fn part1(lines: &Vec<&str>) -> usize {
 	let res = [r#"(\\\\|\\")"#, r"\\x[a-z0-9]{2}"]
@@ -15,7 +17,7 @@ fn part1(lines: &Vec<&str>) -> usize {
 
 			let line_truncated =
 				res.iter().fold(line_truncated, |acc, re| {
-					re.replace_all(&acc, "x".to_string()).to_string()
+					re.replace_all(&acc, "x").to_string()
 				});
 
 			line.len() - line_truncated.len()
@@ -32,12 +34,13 @@ fn part2(lines: &Vec<&str>) -> usize {
 		.sum()
 }
 
-fn main() {
-	let input = fs::read_to_string("days/d08/input.txt")
-		.expect("Something went wrong reading the file");
+fn main() -> Result<()> {
+	let input = fs::read_to_string("days/d08/input.txt")?;
 
 	let input: Vec<&str> = input.lines().collect();
 
 	println!("Part 1: {}", part1(&input));
 	println!("Part 2: {}", part2(&input));
+
+	Ok(())
 }
