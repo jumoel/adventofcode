@@ -5,7 +5,9 @@ use std::fs;
 type Result<T> =
 	::std::result::Result<T, Box<dyn ::std::error::Error>>;
 
-fn part1(flighttimes: &HashMap<(String, String), usize>) -> usize {
+type FlightTimes = HashMap<(String, String), usize>;
+
+fn calculate_distances(flighttimes: &FlightTimes) -> Vec<usize> {
 	let cities: HashSet<String> = HashSet::from_iter(
 		flighttimes.keys().map(|(from, _)| from.to_string()),
 	);
@@ -24,17 +26,13 @@ fn part1(flighttimes: &HashMap<(String, String), usize>) -> usize {
 				})
 				.sum()
 		})
-		.min()
-		.unwrap()
+		.collect::<Vec<_>>()
 }
-
-// fn part2(lines: &Vec<&str>) -> usize {
-// }
 
 fn main() -> Result<()> {
 	let input = fs::read_to_string("days/d09/input.txt")?;
 
-	let input: HashMap<(String, String), usize> = input
+	let input: FlightTimes = input
 		.lines()
 		.map(|line| {
 			let parts = line.split(" ").collect::<Vec<_>>();
@@ -56,8 +54,10 @@ fn main() -> Result<()> {
 		.flatten()
 		.collect();
 
-	println!("Part 1: {}", part1(&input));
-	// println!("Part 2: {}", part2(&input));
+	let distances = calculate_distances(&input);
+
+	println!("Part 1: {}", distances.iter().min().unwrap());
+	println!("Part 2: {}", distances.iter().max().unwrap());
 
 	Ok(())
 }
