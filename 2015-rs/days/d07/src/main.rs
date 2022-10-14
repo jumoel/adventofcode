@@ -8,7 +8,6 @@ type Vals = HashMap<Wire, Val>;
 #[derive(Debug)]
 enum Operation {
 	SET(Wire),
-	SETIMM(Val),
 	RSHIFT(Wire, Val),
 	LSHIFT(Wire, Val),
 	NOT(Wire),
@@ -16,64 +15,42 @@ enum Operation {
 	OR(Wire, Wire),
 }
 
-fn ins(values: &mut Vals, w: Wire, val: Val) -> Val {
-	values.insert(w, val);
+fn process_wire(w: &Wire, values: &mut Vals, ops: &Ops) -> Val {
+	let val = match &ops[w] {
+		Operation::SET(wire) => get_wire(wire, values, ops),
+
+		Operation::RSHIFT(wire, modifier) => {
+			get_wire(wire, values, ops) >> modifier
+		}
+
+		Operation::LSHIFT(wire, modifier) => {
+			get_wire(wire, values, ops) << modifier
+		}
+
+		Operation::AND(wire1, wire2) => {
+			get_wire(wire1, values, ops)
+				& get_wire(wire2, values, ops)
+		}
+
+		Operation::OR(wire1, wire2) => {
+			get_wire(wire1, values, ops)
+				| get_wire(wire2, values, ops)
+		}
+
+		Operation::NOT(wire) => !get_wire(wire, values, ops),
+	};
+
+	values.insert(w.to_string(), val);
 
 	val
 }
 
-fn process_wire(w: Wire, values: &mut Vals, ops: &Ops) -> Val {
-	match ops.get(&w) {
-		Some(Operation::SETIMM(val)) => ins(values, w, *val),
-
-		Some(Operation::SET(wire)) => {
-			let val = get_wire(wire.to_string(), values, ops);
-			ins(values, w, val)
-		}
-
-		Some(Operation::RSHIFT(wire, modifier)) => {
-			let val =
-				get_wire(wire.to_string(), values, ops) >> modifier;
-			ins(values, w, val)
-		}
-
-		Some(Operation::LSHIFT(wire, modifier)) => {
-			let val =
-				get_wire(wire.to_string(), values, ops) << modifier;
-
-			ins(values, w, val)
-		}
-
-		Some(Operation::AND(wire1, wire2)) => {
-			let val1 = get_wire(wire1.to_string(), values, ops);
-			let val2 = get_wire(wire2.to_string(), values, ops);
-
-			ins(values, w, val1 & val2)
-		}
-
-		Some(Operation::OR(wire1, wire2)) => {
-			let val1 = get_wire(wire1.to_string(), values, ops);
-			let val2 = get_wire(wire2.to_string(), values, ops);
-
-			ins(values, w, val1 | val2)
-		}
-
-		Some(Operation::NOT(wire)) => {
-			let val = get_wire(wire.to_string(), values, ops);
-
-			ins(values, w, !val)
-		}
-
-		None => panic!("Invalid operation"),
-	}
-}
-
-fn get_wire(w: Wire, values: &mut Vals, ops: &Ops) -> Val {
+fn get_wire(w: &Wire, values: &mut Vals, ops: &Ops) -> Val {
 	match w.parse() {
 		Ok(val) => val,
-		_ => match values.get(&w) {
+		_ => match values.get(w) {
 			Some(val) => *val,
-			_ => process_wire(w.to_string(), values, ops),
+			_ => process_wire(w, values, ops),
 		},
 	}
 }
@@ -81,16 +58,16 @@ fn get_wire(w: Wire, values: &mut Vals, ops: &Ops) -> Val {
 fn part1(input: &Ops) -> Val {
 	let mut values: Vals = HashMap::new();
 
-	get_wire("a".to_string(), &mut values, input)
+	get_wire(&"a".to_string(), &mut values, input)
 }
 
 fn part2(input: &mut Ops) -> Val {
 	let b_val = part1(input);
 
-	input.insert("b".to_string(), Operation::SETIMM(b_val));
+	input.insert("b".to_string(), Operation::SET(b_val.to_string()));
 	let mut values: Vals = HashMap::new();
 
-	get_wire("a".to_string(), &mut values, input)
+	get_wire(&"a".to_string(), &mut values, input)
 }
 
 fn main() {
@@ -99,53 +76,45 @@ fn main() {
 
 	let mut input: Ops = input
 		.lines()
-		.filter_map(|line| {
+		.map(|line| {
 			let parts = line.split(" ").collect::<Vec<&str>>();
 
 			match parts.as_slice() {
-				[val, "->", out] => match val.parse() {
-					Ok(val) => Some((
-						out.to_string(),
-						Operation::SETIMM(val),
-					)),
-					_ => Some((
-						out.to_string(),
-						Operation::SET(val.to_string()),
-					)),
-				},
+				[val, "->", out] => {
+					(out.to_string(), Operation::SET(val.to_string()))
+				}
 
-				[w1, "RSHIFT", val, "->", out] => Some((
+				[w1, "RSHIFT", val, "->", out] => (
 					out.to_string(),
 					Operation::RSHIFT(
 						w1.to_string(),
 						val.parse().unwrap(),
 					),
-				)),
+				),
 
-				[w1, "LSHIFT", val, "->", out] => Some((
+				[w1, "LSHIFT", val, "->", out] => (
 					out.to_string(),
 					Operation::LSHIFT(
 						w1.to_string(),
 						val.parse().unwrap(),
 					),
-				)),
+				),
 
-				[w1, "AND", w2, "->", out] => Some((
+				[w1, "AND", w2, "->", out] => (
 					out.to_string(),
 					Operation::AND(w1.to_string(), w2.to_string()),
-				)),
+				),
 
-				[w1, "OR", w2, "->", out] => Some((
+				[w1, "OR", w2, "->", out] => (
 					out.to_string(),
 					Operation::OR(w1.to_string(), w2.to_string()),
-				)),
+				),
 
-				["NOT", w1, "->", out] => Some((
-					out.to_string(),
-					Operation::NOT(w1.to_string()),
-				)),
+				["NOT", w1, "->", out] => {
+					(out.to_string(), Operation::NOT(w1.to_string()))
+				}
 
-				_ => None,
+				_ => panic!("Unsupported line: {}", line),
 			}
 		})
 		.collect();
