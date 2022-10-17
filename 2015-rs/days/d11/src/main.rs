@@ -6,7 +6,7 @@ type Result<T> =
 
 fn nextchar(c: char) -> char {
 	match c {
-		'z' => 'a',
+		'z' => 'a', // handles overflow
 		'h' => 'j', // skip i, because it's invalid
 		'k' => 'm', // skip l, because it's invalid
 		'n' => 'p', // skip o, because it's invalid
@@ -15,13 +15,14 @@ fn nextchar(c: char) -> char {
 }
 
 fn incrementpw(pw: &str) -> Result<String> {
-	let res = pw.chars().rev().enumerate().fold(
-		(false, Vec::new()),
-		|(carry, mut acc), (index, c)| {
-			let next =
-				if index == 0 || carry { nextchar(c) } else { c };
+	let res = pw.chars().rev().fold(
+		(true, Vec::new()),
+		|(carry, mut acc), c| {
+			let next = if carry { nextchar(c) } else { c };
 
+			// Inserting at '0' reverses the string to the proper order again
 			acc.insert(0, next as u8);
+
 			(next == 'a' && c == 'z', acc)
 		},
 	);
