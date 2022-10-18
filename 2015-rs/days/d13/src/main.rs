@@ -8,10 +8,38 @@ use itertools::Itertools;
 type Result<T> =
 	::std::result::Result<T, Box<dyn ::std::error::Error>>;
 
+fn max_happiness(
+	happiness: &HashMap<(String, String), i32>,
+	guests: &HashSet<String>,
+) -> i32 {
+	guests
+		.iter()
+		.permutations(guests.len())
+		.map(|permutation| {
+			permutation
+				.iter()
+				.circular_tuple_windows::<(_, _)>()
+				.map(|(n1, n2)| {
+					let p1 = happiness
+						.get(&(n1.to_string(), n2.to_string()))
+						.unwrap_or(&0);
+
+					let p2 = happiness
+						.get(&(n2.to_string(), n1.to_string()))
+						.unwrap_or(&0);
+
+					p1 + p2
+				})
+				.sum::<i32>()
+		})
+		.max()
+		.unwrap_or(0)
+}
+
 fn main() -> Result<()> {
 	let input = fs::read_to_string("days/d13/input.txt")?;
 
-	let (happiness, guests) = input.lines().fold(
+	let (happiness, mut guests) = input.lines().fold(
 		(HashMap::new(), HashSet::new()),
 		|(mut happiness, mut guests), line| {
 			match line
@@ -42,30 +70,11 @@ fn main() -> Result<()> {
 		},
 	);
 
-	let part1 = guests
-		.iter()
-		.permutations(guests.len())
-		.map(|permutation| {
-			permutation
-				.iter()
-				.circular_tuple_windows::<(_, _)>()
-				.map(|(n1, n2)| {
-					let p1 = happiness
-						.get(&(n1.to_string(), n2.to_string()))
-						.unwrap_or(&0);
+	println!("Part 1: {}", max_happiness(&happiness, &guests));
 
-					let p2 = happiness
-						.get(&(n2.to_string(), n1.to_string()))
-						.unwrap_or(&0);
+	guests.insert("Myself".to_string());
 
-					p1 + p2
-				})
-				.sum::<i32>()
-		})
-		.max()
-		.unwrap_or(0);
-
-	println!("Part 1: {}", part1);
+	println!("Part 2: {}", max_happiness(&happiness, &guests));
 
 	Ok(())
 }
