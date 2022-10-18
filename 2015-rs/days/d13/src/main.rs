@@ -20,15 +20,15 @@ fn max_happiness(
 				.iter()
 				.circular_tuple_windows::<(_, _)>()
 				.map(|(n1, n2)| {
-					let p1 = happiness
+					let pair1 = happiness
 						.get(&(n1.to_string(), n2.to_string()))
 						.unwrap_or(&0);
 
-					let p2 = happiness
+					let pair2 = happiness
 						.get(&(n2.to_string(), n1.to_string()))
 						.unwrap_or(&0);
 
-					p1 + p2
+					pair1 + pair2
 				})
 				.sum::<i32>()
 		})
