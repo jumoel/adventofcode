@@ -1,3 +1,4 @@
+use core::panic;
 use std::{
 	collections::{HashMap, HashSet},
 	fs,
@@ -39,9 +40,9 @@ fn max_happiness(
 fn main() -> Result<()> {
 	let input = fs::read_to_string("days/d13/input.txt")?;
 
-	let (happiness, mut guests) = input.lines().fold(
-		(HashMap::new(), HashSet::new()),
-		|(mut happiness, mut guests), line| {
+	let happiness = input
+		.lines()
+		.map(|line| {
 			match line
 				.replace("would ", "")
 				.replace("happiness units by sitting next to ", "")
@@ -56,19 +57,20 @@ fn main() -> Result<()> {
 
 					let sign = if *op == "gain" { 1 } else { -1 };
 
-					guests.insert(name.to_string());
-					happiness.insert(
+					(
 						(name.to_string(), neighbor.to_string()),
 						sign * val,
-					);
+					)
 				}
+				_ => panic!("Invalid line format"),
+			}
+		})
+		.collect::<HashMap<(String, String), i32>>();
 
-				_ => {}
-			};
-
-			(happiness, guests)
-		},
-	);
+	let mut guests = happiness
+		.iter()
+		.map(|((guest, _), _)| guest.to_string())
+		.collect::<HashSet<String>>();
 
 	println!("Part 1: {}", max_happiness(&happiness, &guests));
 
