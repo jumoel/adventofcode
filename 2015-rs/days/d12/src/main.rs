@@ -1,21 +1,8 @@
-use std::fs;
-
-use regex::Regex;
 use serde_json::{Map, Value};
+use std::fs;
 
 type Result<T> =
 	::std::result::Result<T, Box<dyn ::std::error::Error>>;
-
-fn part1(input: &str) -> Result<i32> {
-	let re = Regex::new(r"(-?\d+)")?;
-
-	re.captures_iter(&input).fold(Ok(0), |acc, c| {
-		match i32::from_str_radix(&c[1], 10) {
-			Ok(n) => Ok(acc? + n),
-			_ => acc,
-		}
-	})
-}
 
 fn has_red(obj: &Map<String, Value>) -> bool {
 	obj.into_iter().any(|(_key, value)| match value {
@@ -24,36 +11,35 @@ fn has_red(obj: &Map<String, Value>) -> bool {
 	})
 }
 
-fn tally_json(json: &Value) -> i64 {
+fn tally_json(json: &Value, omit_red: bool) -> i64 {
 	let val = match json {
 		Value::String(_) => 0,
 		Value::Bool(_) => 0,
 		Value::Null => 0,
 		Value::Object(obj) => {
-			if has_red(&obj) {
+			if has_red(&obj) && omit_red {
 				0
 			} else {
-				obj.into_iter().map(|f| tally_json(f.1)).sum()
+				obj.into_iter()
+					.map(|f| tally_json(f.1, omit_red))
+					.sum()
 			}
 		}
 		Value::Number(n) => n.as_i64().expect("Invalid integer"),
-		Value::Array(arr) => arr.iter().map(|a| tally_json(a)).sum(),
+		Value::Array(arr) => {
+			arr.iter().map(|a| tally_json(a, omit_red)).sum()
+		}
 	};
 
 	val
 }
 
-fn part2(input: &str) -> Result<i64> {
-	let json: Value = serde_json::from_str(input)?;
-
-	Ok(tally_json(&json))
-}
-
 fn main() -> Result<()> {
 	let input = fs::read_to_string("days/d12/input.txt")?;
+	let json: Value = serde_json::from_str(&input)?;
 
-	println!("{:?}", part1(&input)?);
-	println!("{:?}", part2(&input)?);
+	println!("{:?}", tally_json(&json, false));
+	println!("{:?}", tally_json(&json, true));
 
 	Ok(())
 }
