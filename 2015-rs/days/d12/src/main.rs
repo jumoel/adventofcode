@@ -17,7 +17,7 @@ fn tally_json(json: &Value, omit_red: bool) -> i64 {
 		Value::Bool(_) => 0,
 		Value::Null => 0,
 		Value::Object(obj) => {
-			if has_red(&obj) && omit_red {
+			if omit_red && has_red(&obj) {
 				0
 			} else {
 				obj.into_iter()
