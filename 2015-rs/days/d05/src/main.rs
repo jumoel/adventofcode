@@ -16,20 +16,14 @@ fn nice1(input: &str) -> usize {
 			return false;
 		}
 
-		let (vowels, has_double) =
-			line.chars().zip_longest(line.chars().skip(1)).fold(
-				(0, false),
-				|(vowels, has_double), vals| match vals {
-					Both(first, second) => (
-						vowels + vowel(first),
-						has_double || first == second,
-					),
-					Left(first) => {
-						(vowels + vowel(first), has_double)
-					}
-					_ => (vowels, has_double),
-				},
-			);
+		let (vowels, has_double) = line.chars().zip_longest(line.chars().skip(1)).fold(
+			(0, false),
+			|(vowels, has_double), vals| match vals {
+				Both(first, second) => (vowels + vowel(first), has_double || first == second),
+				Left(first) => (vowels + vowel(first), has_double),
+				_ => (vowels, has_double),
+			},
+		);
 
 		vowels > 2 && has_double
 	});
@@ -45,17 +39,16 @@ fn nice2(input: &str) -> usize {
 			_ => false,
 		});
 
-		let separated_pairs =
-			chars.windows(2).enumerate().any(|(i, p)| {
-				line.chars()
-					.skip(i + 2)
-					.collect::<Vec<char>>()
-					.windows(2)
-					.any(|p2| match p2 {
-						[f, s] => *f == p[0] && *s == p[1],
-						_ => false,
-					})
-			});
+		let separated_pairs = chars.windows(2).enumerate().any(|(i, p)| {
+			line.chars()
+				.skip(i + 2)
+				.collect::<Vec<char>>()
+				.windows(2)
+				.any(|p2| match p2 {
+					[f, s] => *f == p[0] && *s == p[1],
+					_ => false,
+				})
+		});
 
 		split_pair && separated_pairs
 	});
@@ -64,8 +57,8 @@ fn nice2(input: &str) -> usize {
 }
 
 fn main() {
-	let input = fs::read_to_string("days/d05/input.txt")
-		.expect("Something went wrong reading the file");
+	let input =
+		fs::read_to_string("days/d05/input.txt").expect("Something went wrong reading the file");
 
 	println!("Part 1: {}", nice1(&input));
 

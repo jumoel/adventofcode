@@ -5,10 +5,7 @@ type Result<T> = ::std::result::Result<T, Error>;
 
 type Speed = (i32, i32, i32);
 
-fn distance_after(
-	seconds: i32,
-	(speed, time, rest): Speed,
-) -> Result<i32> {
+fn distance_after(seconds: i32, (speed, time, rest): Speed) -> Result<i32> {
 	let full_rounds = seconds / (time + rest);
 	let remaining = i32::min(time, seconds % (time + rest));
 	let dist = speed * (full_rounds * time + remaining);
@@ -25,10 +22,7 @@ fn part1(speeds: &HashMap<String, Speed>) -> i32 {
 		.expect("part1 failed")
 }
 
-fn winner_after(
-	speeds: &HashMap<String, Speed>,
-	seconds: i32,
-) -> Vec<String> {
+fn winner_after(speeds: &HashMap<String, Speed>, seconds: i32) -> Vec<String> {
 	let distances = speeds
 		.iter()
 		.map(|(name, speed)| {

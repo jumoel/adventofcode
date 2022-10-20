@@ -1,8 +1,7 @@
 use itertools::Itertools;
 use std::fs;
 
-type Result<T> =
-	::std::result::Result<T, Box<dyn ::std::error::Error>>;
+type Result<T> = ::std::result::Result<T, Box<dyn ::std::error::Error>>;
 
 fn nextchar(c: char) -> char {
 	match c {
@@ -15,17 +14,17 @@ fn nextchar(c: char) -> char {
 }
 
 fn incrementpw(pw: &str) -> Result<String> {
-	let res = pw.chars().rev().fold(
-		(true, Vec::new()),
-		|(carry, mut acc), c| {
+	let res = pw
+		.chars()
+		.rev()
+		.fold((true, Vec::new()), |(carry, mut acc), c| {
 			let next = if carry { nextchar(c) } else { c };
 
 			// Inserting at '0' reverses the string to the proper order again
 			acc.insert(0, next as u8);
 
 			(next == 'a' && c == 'z', acc)
-		},
-	);
+		});
 
 	Ok(String::from(std::str::from_utf8(res.1.as_slice())?))
 }
@@ -34,9 +33,7 @@ fn increasing(candidate: &str) -> bool {
 	candidate
 		.chars()
 		.tuple_windows::<(_, _, _)>()
-		.find(|(a, b, c)| {
-			*a as u8 == *b as u8 - 1 && *a as u8 == *c as u8 - 2
-		})
+		.find(|(a, b, c)| *a as u8 == *b as u8 - 1 && *a as u8 == *c as u8 - 2)
 		.is_some()
 }
 
@@ -57,9 +54,7 @@ fn haspairs(candidate: &str) -> bool {
 			// This will hit in the first iteration
 			(_, None) => (1, Some(i)),
 			// If there is a gap of at least 1 between starting indices, the pairs are not overlapping
-			(count, Some(prev)) if i > prev + 1 => {
-				(count + 1, Some(i))
-			}
+			(count, Some(prev)) if i > prev + 1 => (count + 1, Some(i)),
 			_ => acc,
 		});
 

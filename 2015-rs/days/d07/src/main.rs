@@ -1,7 +1,6 @@
 use std::{collections::HashMap, fs};
 
-type Result<T> =
-	::std::result::Result<T, Box<dyn ::std::error::Error>>;
+type Result<T> = ::std::result::Result<T, Box<dyn ::std::error::Error>>;
 
 type Wire = String;
 type Val = u16;
@@ -22,23 +21,13 @@ fn process_wire(w: &Wire, values: &mut Vals, ops: &Ops) -> Val {
 	let val = match &ops[w] {
 		Operation::SET(wire) => get_wire(wire, values, ops),
 
-		Operation::RSHIFT(wire, modifier) => {
-			get_wire(wire, values, ops) >> modifier
-		}
+		Operation::RSHIFT(wire, modifier) => get_wire(wire, values, ops) >> modifier,
 
-		Operation::LSHIFT(wire, modifier) => {
-			get_wire(wire, values, ops) << modifier
-		}
+		Operation::LSHIFT(wire, modifier) => get_wire(wire, values, ops) << modifier,
 
-		Operation::AND(wire1, wire2) => {
-			get_wire(wire1, values, ops)
-				& get_wire(wire2, values, ops)
-		}
+		Operation::AND(wire1, wire2) => get_wire(wire1, values, ops) & get_wire(wire2, values, ops),
 
-		Operation::OR(wire1, wire2) => {
-			get_wire(wire1, values, ops)
-				| get_wire(wire2, values, ops)
-		}
+		Operation::OR(wire1, wire2) => get_wire(wire1, values, ops) | get_wire(wire2, values, ops),
 
 		Operation::NOT(wire) => !get_wire(wire, values, ops),
 	};
@@ -82,24 +71,16 @@ fn main() -> Result<()> {
 			let parts = line.split(" ").collect::<Vec<&str>>();
 
 			match parts.as_slice() {
-				[val, "->", out] => {
-					(out.to_string(), Operation::SET(val.to_string()))
-				}
+				[val, "->", out] => (out.to_string(), Operation::SET(val.to_string())),
 
 				[w1, "RSHIFT", val, "->", out] => (
 					out.to_string(),
-					Operation::RSHIFT(
-						w1.to_string(),
-						val.parse().unwrap(),
-					),
+					Operation::RSHIFT(w1.to_string(), val.parse().unwrap()),
 				),
 
 				[w1, "LSHIFT", val, "->", out] => (
 					out.to_string(),
-					Operation::LSHIFT(
-						w1.to_string(),
-						val.parse().unwrap(),
-					),
+					Operation::LSHIFT(w1.to_string(), val.parse().unwrap()),
 				),
 
 				[w1, "AND", w2, "->", out] => (
@@ -112,9 +93,7 @@ fn main() -> Result<()> {
 					Operation::OR(w1.to_string(), w2.to_string()),
 				),
 
-				["NOT", w1, "->", out] => {
-					(out.to_string(), Operation::NOT(w1.to_string()))
-				}
+				["NOT", w1, "->", out] => (out.to_string(), Operation::NOT(w1.to_string())),
 
 				_ => panic!("Unsupported line: {}", line),
 			}

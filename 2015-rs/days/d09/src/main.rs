@@ -2,15 +2,13 @@ use itertools::Itertools;
 use std::collections::{HashMap, HashSet};
 use std::fs;
 
-type Result<T> =
-	::std::result::Result<T, Box<dyn ::std::error::Error>>;
+type Result<T> = ::std::result::Result<T, Box<dyn ::std::error::Error>>;
 
 type FlightTimes = HashMap<(String, String), usize>;
 
 fn calculate_distances(flighttimes: &FlightTimes) -> Vec<usize> {
-	let cities: HashSet<String> = HashSet::from_iter(
-		flighttimes.keys().map(|(from, _)| from.to_string()),
-	);
+	let cities: HashSet<String> =
+		HashSet::from_iter(flighttimes.keys().map(|(from, _)| from.to_string()));
 
 	cities
 		.iter()
@@ -18,10 +16,7 @@ fn calculate_distances(flighttimes: &FlightTimes) -> Vec<usize> {
 		.map(|plan| {
 			plan.windows(2)
 				.map(|leg| match leg {
-					[from, to] => {
-						flighttimes
-							[&(from.to_string(), to.to_string())]
-					}
+					[from, to] => flighttimes[&(from.to_string(), to.to_string())],
 					_ => panic!("Windows doesn't work"),
 				})
 				.sum()
@@ -39,9 +34,9 @@ fn main() -> Result<()> {
 
 			match parts.as_slice() {
 				[from, "to", to, "=", dist] => {
-					let dist = dist.parse::<usize>().expect(
-						&format!("Invalid dist format: {}", dist),
-					);
+					let dist = dist
+						.parse::<usize>()
+						.expect(&format!("Invalid dist format: {}", dist));
 
 					[
 						((from.to_string(), to.to_string()), dist),
