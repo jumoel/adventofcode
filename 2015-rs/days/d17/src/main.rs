@@ -19,9 +19,22 @@ fn main() -> Result<()> {
 		.map(|i| buckets.iter().combinations(i).collect::<Vec<_>>())
 		.flatten()
 		.filter(|p| p.iter().fold(0, |acc, e| acc + **e) == storage)
+		.collect::<Vec<_>>();
+
+	let min_containers = permutations
+		.iter()
+		.map(|f| f.len())
+		.sorted()
+		.next()
+		.ok_or("Finding minimum cointainer count failed")?;
+
+	let part2 = permutations
+		.iter()
+		.filter(|f| f.len() == min_containers)
 		.count();
 
-	println!("{:?}", permutations);
+	println!("Part 1: {}", permutations.len());
+	println!("Part 2: {}", part2);
 
 	Ok(())
 }
