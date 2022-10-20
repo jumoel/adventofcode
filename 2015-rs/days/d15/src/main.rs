@@ -73,20 +73,31 @@ fn main() -> Result<()> {
 			.max(0)
 	}
 
-	let part1 = ingredient_combinations
-		.iter()
-		.map(|combi| {
-			let capacity = sum_property(&ingredients, combi, 0);
-			let durability = sum_property(&ingredients, combi, 1);
-			let flavor = sum_property(&ingredients, combi, 2);
-			let texture = sum_property(&ingredients, combi, 3);
+	let cookies = ingredient_combinations.iter().map(|combi| {
+		let capacity = sum_property(&ingredients, combi, 0);
+		let durability = sum_property(&ingredients, combi, 1);
+		let flavor = sum_property(&ingredients, combi, 2);
+		let texture = sum_property(&ingredients, combi, 3);
+		let calories = sum_property(&ingredients, combi, 4);
 
-			capacity * durability * flavor * texture
-		})
-		.max()
-		.ok_or("Part1 failed")?;
+		(capacity * durability * flavor * texture, calories)
+	});
+
+	let part1 = cookies
+		.clone()
+		.max_by_key(|c| c.0)
+		.ok_or("Part 1 failed")?
+		.0;
+
+	let part2 = cookies
+		.clone()
+		.filter(|c| c.1 == 500)
+		.max_by_key(|c| c.0)
+		.ok_or("Part 2 failed")?
+		.0;
 
 	println!("Part 1: {}", part1);
+	println!("Part 2: {}", part2);
 
 	Ok(())
 }
