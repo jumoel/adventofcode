@@ -15,9 +15,7 @@ enum Operation {
 
 fn str_to_range(s: &str) -> Range {
 	match s.split(",").collect::<Vec<&str>>()[..] {
-		[f, t] => {
-			(f.parse::<usize>().unwrap(), t.parse::<usize>().unwrap())
-		}
+		[f, t] => (f.parse::<usize>().unwrap(), t.parse::<usize>().unwrap()),
 		_ => panic!("Invalid range"),
 	}
 }
@@ -31,11 +29,7 @@ fn part<T>(
 	sum: fn(&T) -> i32,
 ) -> i32 {
 	for op in input {
-		let ((x_f, y_f), (x_t, y_t), op_fn): (
-			Range,
-			Range,
-			ModFn<T>,
-		) = match op {
+		let ((x_f, y_f), (x_t, y_t), op_fn): (Range, Range, ModFn<T>) = match op {
 			Operation::TurnOff(f, t) => (*f, *t, op_off),
 			Operation::TurnOn(f, t) => (*f, *t, op_on),
 			Operation::Toggle(f, t) => (*f, *t, op_toggle),
@@ -43,8 +37,7 @@ fn part<T>(
 
 		for y in y_f..=y_t {
 			for x in x_f..=x_t {
-				let cell =
-					lights.get_mut(y).unwrap().get_mut(x).unwrap();
+				let cell = lights.get_mut(y).unwrap().get_mut(x).unwrap();
 				*cell = op_fn(cell)
 			}
 		}
@@ -110,8 +103,8 @@ fn part2(input: std::slice::Iter<Operation>) -> i32 {
 }
 
 fn main() {
-	let input = fs::read_to_string("days/d06/input.txt")
-		.expect("Something went wrong reading the file");
+	let input =
+		fs::read_to_string("days/d06/input.txt").expect("Something went wrong reading the file");
 
 	let input: Vec<Operation> = input
 		.lines()
@@ -120,22 +113,13 @@ fn main() {
 
 			match parts.as_slice() {
 				["turn", "on", from, "through", to] => {
-					Some(Operation::TurnOn(
-						str_to_range(from),
-						str_to_range(to),
-					))
+					Some(Operation::TurnOn(str_to_range(from), str_to_range(to)))
 				}
 				["turn", "off", from, "through", to] => {
-					Some(Operation::TurnOff(
-						str_to_range(from),
-						str_to_range(to),
-					))
+					Some(Operation::TurnOff(str_to_range(from), str_to_range(to)))
 				}
 				["toggle", from, "through", to] => {
-					Some(Operation::Toggle(
-						str_to_range(from),
-						str_to_range(to),
-					))
+					Some(Operation::Toggle(str_to_range(from), str_to_range(to)))
 				}
 				_ => None,
 			}

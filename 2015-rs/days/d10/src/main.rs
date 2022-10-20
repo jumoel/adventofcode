@@ -1,7 +1,6 @@
 use std::fs;
 
-type Result<T> =
-	::std::result::Result<T, Box<dyn ::std::error::Error>>;
+type Result<T> = ::std::result::Result<T, Box<dyn ::std::error::Error>>;
 
 fn lookandsay(input: String) -> String {
 	let mut iter = input.trim().chars();

@@ -6,13 +6,9 @@ use std::{
 
 use itertools::Itertools;
 
-type Result<T> =
-	::std::result::Result<T, Box<dyn ::std::error::Error>>;
+type Result<T> = ::std::result::Result<T, Box<dyn ::std::error::Error>>;
 
-fn max_happiness(
-	happiness: &HashMap<(String, String), i32>,
-	guests: &HashSet<String>,
-) -> i32 {
+fn max_happiness(happiness: &HashMap<(String, String), i32>, guests: &HashSet<String>) -> i32 {
 	guests
 		.iter()
 		.permutations(guests.len())
@@ -52,15 +48,11 @@ fn main() -> Result<()> {
 				.as_slice()
 			{
 				[name, op, val, neighbor] => {
-					let val = i32::from_str_radix(val, 10)
-						.expect("Invalid integer");
+					let val = i32::from_str_radix(val, 10).expect("Invalid integer");
 
 					let sign = if *op == "gain" { 1 } else { -1 };
 
-					(
-						(name.to_string(), neighbor.to_string()),
-						sign * val,
-					)
+					((name.to_string(), neighbor.to_string()), sign * val)
 				}
 				_ => panic!("Invalid line format"),
 			}
