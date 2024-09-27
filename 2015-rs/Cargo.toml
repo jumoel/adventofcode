@@ -1,5 +1,4 @@
 [workspace]
-
-members = [
-	"days/*"
-]
+resolver = "2"
+members = ["days/*"]
+edition = "2021"
