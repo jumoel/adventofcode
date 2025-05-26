@@ -30,7 +30,7 @@ fn part2(lines: &Vec<&str>) -> usize {
 }
 
 fn main() -> Result<()> {
-	let input = fs::read_to_string("days/d08/input.txt")?;
+	let input = fs::read_to_string("../input/2015/8/input.txt")?;
 
 	let input: Vec<&str> = input.lines().collect();
 

@@ -76,7 +76,7 @@ fn nextpw(pw: &str) -> Result<String> {
 }
 
 fn main() -> Result<()> {
-	let input = fs::read_to_string("days/d11/input.txt")?;
+	let input = fs::read_to_string("../input/2015/11/input.txt")?;
 
 	let part1 = nextpw(&input.trim())?;
 	println!("Part 1: {}", part1);

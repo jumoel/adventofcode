@@ -6,7 +6,7 @@ use regex::{Match, Regex};
 type Result<T> = ::std::result::Result<T, Box<dyn ::std::error::Error>>;
 
 fn main() -> Result<()> {
-	let input = fs::read_to_string("days/d15/input.txt")?;
+	let input = fs::read_to_string("../input/2015/15/input.txt")?;
 
 	/*
 	Frosting: capacity 4, durability -2, flavor 0, texture 0, calories 5

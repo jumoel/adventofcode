@@ -63,7 +63,7 @@ fn part2(clues: &HashMap<&str, i32>, sues: &Vec<(i32, HashMap<&str, i32>)>) -> R
 }
 
 fn main() -> Result<()> {
-	let input = fs::read_to_string("days/d16/input.txt")?;
+	let input = fs::read_to_string("../input/2015/16/input.txt")?;
 
 	let sue_re = Regex::new(r"Sue (\d+):")?;
 	let clue_re = Regex::new(r" ((\w+): (\d+))")?;

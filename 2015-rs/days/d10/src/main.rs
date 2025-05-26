@@ -27,7 +27,7 @@ fn repeat(input: &String, count: usize) -> usize {
 }
 
 fn main() -> Result<()> {
-	let input = fs::read_to_string("days/d10/input.txt")?;
+	let input = fs::read_to_string("../input/2015/10/input.txt")?;
 
 	println!("Part 1: {}", repeat(&input, 40));
 	println!("Part 2: {}", repeat(&input, 50));

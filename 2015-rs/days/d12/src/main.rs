@@ -30,7 +30,7 @@ fn tally_json(json: &Value, omit_red: bool) -> i64 {
 }
 
 fn main() -> Result<()> {
-	let input = fs::read_to_string("days/d12/input.txt")?;
+	let input = fs::read_to_string("../input/2015/12/input.txt")?;
 	let json: Value = serde_json::from_str(&input)?;
 
 	println!("{:?}", tally_json(&json, false));

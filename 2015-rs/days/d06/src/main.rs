@@ -104,7 +104,7 @@ fn part2(input: std::slice::Iter<Operation>) -> i32 {
 
 fn main() {
 	let input =
-		fs::read_to_string("days/d06/input.txt").expect("Something went wrong reading the file");
+		fs::read_to_string("../input/2015/6/input.txt").expect("Something went wrong reading the file");
 
 	let input: Vec<Operation> = input
 		.lines()

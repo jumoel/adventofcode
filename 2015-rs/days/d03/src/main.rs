@@ -19,7 +19,7 @@ fn santa(cs: &mut dyn Iterator<Item = char>, visited: &mut HashMap<(i32, i32), i
 
 fn main() {
 	let input =
-		fs::read_to_string("days/d03/input.txt").expect("Something went wrong reading the file");
+		fs::read_to_string("../input/2015/3/input.txt").expect("Something went wrong reading the file");
 
 	let mut visited1 = HashMap::new();
 

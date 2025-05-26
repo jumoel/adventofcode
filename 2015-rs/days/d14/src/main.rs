@@ -72,7 +72,7 @@ fn part2(speeds: &HashMap<String, Speed>) -> i32 {
 }
 
 fn main() -> Result<()> {
-	let input = fs::read_to_string("days/d14/input.txt")?;
+	let input = fs::read_to_string("../input/2015/14/input.txt")?;
 
 	let speeds = input
 		.lines()

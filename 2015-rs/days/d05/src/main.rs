@@ -58,7 +58,7 @@ fn nice2(input: &str) -> usize {
 
 fn main() {
 	let input =
-		fs::read_to_string("days/d05/input.txt").expect("Something went wrong reading the file");
+		fs::read_to_string("../input/2015/5/input.txt").expect("Something went wrong reading the file");
 
 	println!("Part 1: {}", nice1(&input));
 

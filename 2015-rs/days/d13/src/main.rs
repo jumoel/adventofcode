@@ -34,7 +34,7 @@ fn max_happiness(happiness: &HashMap<(String, String), i32>, guests: &HashSet<St
 }
 
 fn main() -> Result<()> {
-	let input = fs::read_to_string("days/d13/input.txt")?;
+	let input = fs::read_to_string("../input/2015/13/input.txt")?;
 
 	let happiness = input
 		.lines()

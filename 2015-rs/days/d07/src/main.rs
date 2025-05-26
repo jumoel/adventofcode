@@ -63,7 +63,7 @@ fn part2(input: &mut Ops) -> Val {
 }
 
 fn main() -> Result<()> {
-	let input = fs::read_to_string("days/d07/input.txt")?;
+	let input = fs::read_to_string("../input/2015/7/input.txt")?;
 
 	let mut input: Ops = input
 		.lines()

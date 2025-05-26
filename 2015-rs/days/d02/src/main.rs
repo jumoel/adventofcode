@@ -3,7 +3,7 @@ use std::fs;
 
 fn main() {
 	let input =
-		fs::read_to_string("days/d02/input.txt").expect("Something went wrong reading the file");
+		fs::read_to_string("../input/2015/2/input.txt").expect("Something went wrong reading the file");
 
 	let input_clean = input
 		.lines()

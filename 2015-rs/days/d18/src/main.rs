@@ -110,7 +110,7 @@ fn part2(world: &World) -> i32 {
 }
 
 fn main() -> Result<()> {
-	let input = fs::read_to_string("days/d18/input.txt")?;
+	let input = fs::read_to_string("../input/2015/18/input.txt")?;
 
 	let world: World = input
 		.trim()

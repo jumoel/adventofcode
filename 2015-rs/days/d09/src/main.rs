@@ -25,7 +25,7 @@ fn calculate_distances(flighttimes: &FlightTimes) -> Vec<usize> {
 }
 
 fn main() -> Result<()> {
-	let input = fs::read_to_string("days/d09/input.txt")?;
+	let input = fs::read_to_string("../input/2015/9/input.txt")?;
 
 	let input: FlightTimes = input
 		.lines()
