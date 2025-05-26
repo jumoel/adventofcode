@@ -1,3 +1,3 @@
 [submodule "input"]
 	path = input
-	url = https://github.com/jumoel/adventofcode-input
+	url = git@github.com:jumoel/adventofcode-input.git
