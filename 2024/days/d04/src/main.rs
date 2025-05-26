@@ -123,7 +123,7 @@ fn part2(cw: &Vec<Vec<char>>) -> usize {
 }
 
 fn main() -> Result<()> {
-    let input = fs::read_to_string("inputs/d04.txt")?;
+    let input = fs::read_to_string("../input/2024/4/input.txt")?;
 
     let crossword = input
         .lines()

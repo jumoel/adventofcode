@@ -19,7 +19,7 @@ fn safe(l: Vec<i32>) -> bool {
 }
 
 fn main() -> Result<()> {
-    let input = fs::read_to_string("inputs/d02.txt")?;
+    let input = fs::read_to_string("../input/2024/2/input.txt")?;
     let inputs = input.lines().map(|l| {
         l.split_whitespace()
             .filter_map(|p| p.parse::<i32>().ok())

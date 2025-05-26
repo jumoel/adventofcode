@@ -53,7 +53,7 @@ fn parse_mul(s: &str) -> IResult<&str, Op> {
 }
 
 fn main() -> Result<()> {
-    let input = fs::read_to_string("inputs/d03.txt")?;
+    let input = fs::read_to_string("../input/2024/3/input.txt")?;
 
     let instructions = parser(&input).unwrap().1;
 

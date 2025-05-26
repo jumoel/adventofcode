@@ -11,7 +11,7 @@ fn freq_map(list: Vec<i32>) -> HashMap<i32, i32> {
 }
 
 fn main() -> Result<()> {
-    let input = fs::read_to_string("inputs/d01.txt")?;
+    let input = fs::read_to_string("../input/2024/1/input.txt")?;
 
     let (mut left, mut right): (Vec<i32>, Vec<i32>) = input
         .lines()

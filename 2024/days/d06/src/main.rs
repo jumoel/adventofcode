@@ -95,7 +95,7 @@ fn part1(map: &Map) -> Result<usize> {
 }
 
 fn main() -> Result<()> {
-    let input = fs::read_to_string("inputs/d06.txt")?;
+    let input = fs::read_to_string("../input/2024/6/input.txt")?;
 
     let map: Map = input.lines().map(|l| l.chars().collect()).collect();
 

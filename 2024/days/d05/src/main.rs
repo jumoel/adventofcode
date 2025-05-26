@@ -26,7 +26,7 @@ fn pages_valid(pages: &Vec<i32>, instructions: &Instructions) -> bool {
 }
 
 fn main() -> Result<()> {
-    let input = fs::read_to_string("inputs/d05.txt")?;
+    let input = fs::read_to_string("../input/2024/5/input.txt")?;
 
     let (instructions, pages) = input.split_once("\n\n").context("Invalid input")?;
 
