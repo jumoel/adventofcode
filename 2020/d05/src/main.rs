@@ -63,7 +63,7 @@ fn part2(input: &str) -> i32 {
 }
 
 fn main() -> Result<()> {
-	let input = fs::read_to_string("d05/input.txt")?;
+	let input = fs::read_to_string("../input/2020/5/input.txt")?;
 
 	println!("{:?}", part1(&input));
 	println!("{:?}", part2(&input));

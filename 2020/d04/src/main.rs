@@ -106,7 +106,7 @@ fn part2(passports: &Vec<&str>, reqs: &Vec<&str>) -> Result<usize> {
 }
 
 fn main() -> Result<()> {
-	let input = fs::read_to_string("d04/input.txt")?;
+	let input = fs::read_to_string("../input/2020/4/input.txt")?;
 
 	let passports: Vec<&str> = input.split("\n\n").collect();
 	let reqs: Vec<&str> =

@@ -32,7 +32,7 @@ fn parse2(min: usize, max: usize, req: char, pw: &str) -> i32 {
 }
 
 fn main() -> Result<()> {
-	let input = fs::read_to_string("d02/input.txt")?;
+	let input = fs::read_to_string("../input/2020/2/input.txt")?;
 
 	let mut lines = input.lines();
 

@@ -14,7 +14,7 @@ fn part2(input: String, preamble: usize) -> Result<i32> {
 }
 
 fn main() -> Result<()> {
-	let input = fs::read_to_string("d09/input.txt")?;
+	let input = fs::read_to_string("../input/2020/9/input.txt")?;
 	let preamble = 5;
 
 	println!("{:?}", part1(&input, preamble)?);

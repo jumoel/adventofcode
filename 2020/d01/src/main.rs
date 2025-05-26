@@ -41,7 +41,7 @@ fn part2(s: &HashSet<i32>) -> Result<i32> {
 }
 
 fn main() -> Result<()> {
-	let input = fs::read_to_string("d01/input.txt")?;
+	let input = fs::read_to_string("../input/2020/1/input.txt")?;
 
 	let entries: HashSet<i32> =
 		input.lines().map(|l| l.parse()).flatten().collect();

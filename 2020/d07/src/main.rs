@@ -50,7 +50,7 @@ fn part2(bags: &RuleMap) -> i32 {
 }
 
 fn main() -> Result<()> {
-	let input = fs::read_to_string("d07/input.txt")?;
+	let input = fs::read_to_string("../input/2020/7/input.txt")?;
 	let rule_re = Regex::new("^\\s*(\\d)+ (.+) bags?\\.?$")?;
 
 	let bags: RuleMap = input

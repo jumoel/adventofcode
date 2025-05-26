@@ -40,7 +40,7 @@ fn part2(input: &str) -> usize {
 }
 
 fn main() -> Result<()> {
-	let input = fs::read_to_string("d06/input.txt")?;
+	let input = fs::read_to_string("../input/2020/6/input.txt")?;
 
 	println!("{:?}", part1(&input));
 	println!("{:?}", part2(&input));
