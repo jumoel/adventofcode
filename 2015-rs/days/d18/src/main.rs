@@ -38,23 +38,14 @@ fn neighbors_on(world: &World, x: i32, y: i32) -> i32 {
 
 fn next_world(world: &World, next_char: &dyn Fn(char, i32, usize, usize) -> char) -> World {
 	let mut clone = world.clone();
-	let sy = clone.len();
-	let sx = clone[0].len();
 
-	for y in 0..sy {
-		for x in 0..sx {
-			clone[y][x] = next_char(clone[y][x], neighbors_on(&world, x as i32, y as i32), x, y);
+	for (y, row) in clone.iter_mut().enumerate() {
+		for (x, cell) in row.iter_mut().enumerate() {
+			*cell = next_char(*cell, neighbors_on(world, x as i32, y as i32), x, y);
 		}
 	}
 
 	clone
-}
-
-fn print_world(world: &World) {
-	print!(
-		"{}\n\n",
-		world.iter().map(|line| line.iter().join("")).join("\n")
-	)
 }
 
 fn lights_on(world: &World) -> i32 {
